@@ -11,7 +11,7 @@ int main(int ac, char **av)
     server.run();
     return 0;
 }
-// ttributs vecteurs a modifier ? 
+// attributs vecteurs a modifier ? 
 // 
 // non-blocking + buffers + passage des lignes au protocole + envoi + gestion des erreurs
 // 

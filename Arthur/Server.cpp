@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "Client.hpp"
 
 Server::Server(int port) : _serverFd(-1), _port(port)
 {
@@ -66,7 +67,7 @@ void Server::acceptNewClient()
     int clientFd = accept(_serverFd, NULL, NULL);
     if (clientFd < 0)
         return;
-
+// init tous les attributs a 0 + ajouter client a la map 
     std::cout << "Nouveau client connecté, fd = " << clientFd << std::endl;
 
     pollfd clientPoll;
@@ -75,22 +76,42 @@ void Server::acceptNewClient()
     clientPoll.revents = 0;
 
     _pfds.push_back(clientPoll);
+    _clients[clientFd] = Client(clientFd);
 }
 
+void Server::removeClient(size_t i)
+{
+    int fd = _pfds[i].fd;
+
+    std::cout << "Client déconnecté, fd = " << fd << std::endl;
+
+    close(fd);                 // ferme la socket
+    _clients.erase(fd);        // supprime de la map
+    _pfds.erase(_pfds.begin() + i); // retire de poll
+}
+// stocker dans BUffer les data recu du client grace a recv puis
+// appeler methode de la class Client pour save toutes les donnees (le reste de limplementation se fera dans Client) 
 void Server::handlePollEvent(size_t i)
 {
+    int fd = _pfds[i].fd;
+    Client& client = _clients[fd];
+
     char buffer[1024];
-    int bytes = recv(_pfds[i].fd, buffer, sizeof(buffer) - 1, 0);
+    int bytes = recv(fd, buffer, sizeof(buffer), 0);
 
     if (bytes <= 0)
     {
-        std::cout << "Client déconnecté, fd = " << _pfds[i].fd << std::endl;
-        close(_pfds[i].fd);
-        _pfds.erase(_pfds.begin() + i);
+        removeClient(i);
         return;
     }
-    //chercher si le buffer contient \r\n sinon le msg est partiel 
-    //si ce dernier contient bien ces elements et quil reste des donnees derriere, stocker les dinees restatnesdans un autre buffer
-    buffer[bytes] = '\0';
-    std::cout << "Message reçu de fd " << _pfds[i].fd << " : " << buffer << std::endl;
+
+    client.appendToInputBuffer(buffer, bytes);
+
+    if (client.hasCompleteLine())
+    {
+        std::string line = client.extractLine();
+        std::cout << line << "\n";
+        // handleLine(fd, line);
+    }
 }
+

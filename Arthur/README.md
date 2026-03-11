@@ -7,6 +7,9 @@ A faire :
 -Gerer autres flags de revent + faire attention a l'odre de traitement (eviter de sortir avant davoir execute certaines demandes)
 -Commencer a implementer la fonction permettant de ne pas bloquer le flux (ne pas bloquer les fd)
 
+Update 11/03 19h22:
+-> l'envoie des msg nest pas recu pas le serveur, le bug provient du '\r' qui nest pas genere automatiquement sur mac (a tester sur autre environnement), donc parsing plus light en attendant avec uniquemnt "\n"
+
 ## PROCESS visé :
 1. créer la socket serveur
 2. attacher la socket au port
