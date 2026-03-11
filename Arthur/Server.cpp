@@ -13,6 +13,7 @@ Server::~Server()
         close(_pfds[i].fd);
 }
 
+//initier une socket (canal bi-lateral) et mettre sur ecoute sur le bon port
 void Server::initSocket()
 {
     _serverFd = socket(AF_INET, SOCK_STREAM, 0);
@@ -21,9 +22,10 @@ void Server::initSocket()
 
     sockaddr_in addr = {}; // permet d'init tous les elements a 0
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(_port);
+    addr.sin_port = htons(_port); // convertir le port en bytes ordrer dureseau
     addr.sin_addr.s_addr = INADDR_ANY;
 
+    // lier la socket a l'adresse 
     if (bind(_serverFd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
         throw std::runtime_error("bind failed");
 
@@ -31,6 +33,7 @@ void Server::initSocket()
         throw std::runtime_error("listen failed");
 }
 
+// ajouter notre socket serveur a struct pollfd + ecouter toutes requetes fait sur ce dernier
 void Server::run()
 {
     pollfd serverPoll;
@@ -40,14 +43,16 @@ void Server::run()
 
     _pfds.push_back(serverPoll);
 
+    // boucle infini pour aouter les nouveaux clients
     while (true)
     {
-        if (poll(_pfds.data(), _pfds.size(), -1) < 0)
+        if (poll(_pfds.data(), _pfds.size(), -1) < 0) // ATTENTIOn, il faudrq que je passe a 0 pkutt qe -1 pour du non bloquant
             throw std::runtime_error("poll failed");
 
-        if (_pfds[0].revents & POLLIN)
+        if (_pfds[0].revents & POLLIN) // verif qu'un fag POLLIN (demande de connexion) est bien present dans le revents
             acceptNewClient();
 
+        // si une socket contient un revent avec le flag POLLIN, on va retirer les donnees
         for (size_t i = 1; i < _pfds.size(); i++)
         {
             if (_pfds[i].revents & POLLIN)
@@ -72,19 +77,20 @@ void Server::acceptNewClient()
     _pfds.push_back(clientPoll);
 }
 
-// void Server::handlePollEvent(size_t i)
-// {
-//     char buffer[1024];
-//     int bytes = recv(_pfds[i].fd, buffer, sizeof(buffer) - 1, 0);
+void Server::handlePollEvent(size_t i)
+{
+    char buffer[1024];
+    int bytes = recv(_pfds[i].fd, buffer, sizeof(buffer) - 1, 0);
 
-//     if (bytes <= 0)
-//     {
-//         std::cout << "Client déconnecté, fd = " << _pfds[i].fd << std::endl;
-//         close(_pfds[i].fd);
-//         _pfds.erase(_pfds.begin() + i);
-//         return;
-//     }
-
-//     buffer[bytes] = '\0';
-//     std::cout << "Message reçu de fd " << _pfds[i].fd << " : " << buffer << std::endl;
-// }
+    if (bytes <= 0)
+    {
+        std::cout << "Client déconnecté, fd = " << _pfds[i].fd << std::endl;
+        close(_pfds[i].fd);
+        _pfds.erase(_pfds.begin() + i);
+        return;
+    }
+    //chercher si le buffer contient \r\n sinon le msg est partiel 
+    //si ce dernier contient bien ces elements et quil reste des donnees derriere, stocker les dinees restatnesdans un autre buffer
+    buffer[bytes] = '\0';
+    std::cout << "Message reçu de fd " << _pfds[i].fd << " : " << buffer << std::endl;
+}
