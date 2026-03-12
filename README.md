@@ -14,7 +14,7 @@ Update 11/03 19h22:
 MERGE :
 
 Server.hpp -> pesner a ajuster constructeur cote Simon / modif appel attribut _client cote Arthur + voir si on garde pointeur sur CLietn dans map
-
+A FAIRE : chaucn met au propre ses fichiers puis call pour tester un main commun 
 
 ## PROCESS visé :
 1. créer la socket serveur
