@@ -63,7 +63,7 @@ void Server::acceptNewClient()
     clientPoll.revents = 0;
 
     _pfds.push_back(clientPoll);
-    _clients[clientFd] = Client(clientFd);
+    _clients[clientFd] = new Client(clientFd);
 }
 
 void Server::removeClient(size_t i)
@@ -73,6 +73,7 @@ void Server::removeClient(size_t i)
     std::cout << "Client déconnecté, fd = " << fd << std::endl;
 
     close(fd);                 // ferme la socket
+    delete _clients[fd];
     _clients.erase(fd);        // supprime de la map
     _pfds.erase(_pfds.begin() + i); // retire de poll
 }
@@ -81,7 +82,7 @@ void Server::removeClient(size_t i)
 void Server::handlePollEvent(size_t i)
 {
     int fd = _pfds[i].fd;
-    Client& client = _clients[fd];
+    Client* client = _clients[fd];
 
     char buffer[1024];
     int bytes = recv(fd, buffer, sizeof(buffer), 0);
@@ -92,11 +93,11 @@ void Server::handlePollEvent(size_t i)
         return;
     }
 
-    client.appendToInputBuffer(buffer, bytes);
+    client->appendToInputBuffer(buffer, bytes);
 
-    if (client.hasCompleteLine())
+    if (client->hasCompleteLine())
     {
-        std::string line = client.extractLine();
+        std::string line = client->extractLine();
         std::cout << line << "\n";
         // handleLine(fd, line);
     }

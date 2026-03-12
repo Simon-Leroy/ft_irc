@@ -27,7 +27,7 @@ private:
     	typedef void (Server::*cmd_ptr)(Client* client, const std::vector<std::string>& args);
 		std::map<std::string, cmd_ptr>	_commands;
 		std::map<int, Client*>			_clients;
-		std::string						_password = "provisoire";
+		std::string						_password;
 
 public:
     Server(int port);

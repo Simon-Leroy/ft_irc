@@ -2,6 +2,7 @@
 
 Server::Server(int port) : _serverFd(-1), _port(port)
 {
+	this->_password = "provisoire";
     initCommands();
 }
 

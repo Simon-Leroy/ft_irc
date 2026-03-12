@@ -1,17 +1,5 @@
 #include "../Client.hpp"
 
-/* ==== CONSTRUCTOR AND DESTRUCTOR ==== */
-
-Client::Client(int fd): _fd(fd), _isRegistered(false)
-{
-
-}
-
-Client::~Client(void)
-{
-
-}
-
 /* ==== MEMBER FUNCTIONS ==== */
 
 /* ==== GETTERS AND SETTERS ==== */

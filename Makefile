@@ -1,12 +1,15 @@
 NAME = ircserv
 
-SRCFILES = main_simon.cpp \
-			Server_simon.cpp \
-			Client.cpp \
-			Commands.cpp \
-			Utils.cpp
+SRCFILES = Clients/Client.cpp \
+			Clients/reseau.cpp \
+			Clients/Set.cpp \
+			Servers/irc.cpp \
+			Servers/reseau.cpp \
+			Servers/Server.cpp \
+			Utils.cpp \
+			main.cpp
 
-HEADERS = Server_simon.hpp \
+HEADERS = Server.hpp \
 			Client.hpp
 
 OBJFILES = $(SRCFILES:.cpp=.o)
