@@ -33,11 +33,14 @@ class Server
 		// Command functions
 		void	execNick(Client* client, const std::vector<std::string>& args);
 		void	execPass(Client* client, const std::vector<std::string>& args);
+		void	execUser(Client* client, const std::vector<std::string>& args);
 		void	execPrivmsg(Client* client, const std::vector<std::string>& args);
+
+		void	registerClient(Client* client);
 
 };
 
-std::string str_toupper(std::string str);
+std::string	str_toupper(std::string str);
 std::string	ft_trim(const std::string& str);
 std::vector<std::string> ft_split(const std::string& line);
 

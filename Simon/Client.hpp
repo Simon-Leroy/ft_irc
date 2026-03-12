@@ -9,6 +9,7 @@ class Client
 		int			_fd;
 		std::string	_nickname;
 		std::string _username;
+		std::string	_realname;
 		bool		_hasNickname;
 		bool		_hasPassword;
 		bool		_hasUser;
@@ -28,6 +29,8 @@ class Client
 		bool		getIsRegistered(void) const;
 
 		void		setNickname(const std::string& nick);
+		void		setUsername(const std::string& username);
+		void		setRealname(const std::string& realname);
 
 		// Registration
 		void		setHasPass(bool newStatus);

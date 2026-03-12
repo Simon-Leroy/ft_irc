@@ -21,3 +21,10 @@ bool Server::isNickUsed(const std::string& nick) const
 	}
 	return false;
 }
+
+void Server::registerClient(Client* client)
+{
+	client->setIsRegistered(true);
+	std::cout << "Welcome to server blabla -> message à envoyer avec send()" << std::endl;
+	std::cout << "Client " << client->getFd() << " is registered as " << client->getNickname() << std::endl;
+}

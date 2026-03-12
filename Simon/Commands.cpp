@@ -47,7 +47,28 @@ void	Server::execNick(Client* client, const std::vector<std::string>& args)
 		return ;
 	}
 	client->setNickname(args[1]);
+	client->setHasNickname(true);
 	std::cout << "Client " << client->getFd() << " set his nickname to " << args[1] << std::endl;
+}
+
+void	Server::execUser(Client* client, const std::vector<std::string>& args)
+{
+	if (args.size() < 5)
+	{
+		std::cerr << "461 ERR_NEEDMOREPARAMS --> erreur à renvoyer au client" << std::endl;
+		return ;
+	}
+	if (client->getIsRegistered())
+	{
+		std::cerr << "462 ERR_ALREADYREGISTRED --> erreur à renvoyer au serveur" << std::endl;
+		return ;
+	}
+	client->setUsername(args[1]);
+	client->setRealname(args[4]);
+	client->setHasUser(true);
+	if (client->getHasPass() && client->getHasNickname() && client->getHasUser())
+		registerClient(client);
+	std::cout << "fin execUser" << std::endl;
 }
 
 /* COMMANDES POUR TESTER
@@ -69,6 +90,7 @@ void	Server::initCommands(void)
 {
 	_commands["PASS"] = &Server::execPass;
 	_commands["NICK"] = &Server::execNick;
+	_commands["USER"] = &Server::execUser;
 	_commands["PRIVMSG"] = &Server::execPrivmsg;
 }
 
