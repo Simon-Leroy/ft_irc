@@ -10,6 +10,12 @@ A faire :
 Update 11/03 19h22:
 -> l'envoie des msg nest pas recu pas le serveur, le bug provient du '\r' qui nest pas genere automatiquement sur mac (a tester sur autre environnement), donc parsing plus light en attendant avec uniquemnt "\n"
 
+
+MERGE :
+
+Server.hpp -> pesner a ajuster constructeur cote Simon / modif appel attribut _client cote Arthur + voir si on garde pointeur sur CLietn dans map
+
+
 ## PROCESS visé :
 1. créer la socket serveur
 2. attacher la socket au port
