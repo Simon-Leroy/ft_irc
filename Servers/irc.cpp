@@ -1,15 +1,5 @@
-#include "Server_simon.hpp"
-#include "Client.hpp"
-
-Server::Server(std::string pass): _password(pass)
-{
-	initCommands();
-}
-
-Server::~Server()
-{
-
-}
+#include "../Server.hpp"
+#include "../Client.hpp"
 
 bool Server::isNickUsed(const std::string& nick) const
 {
@@ -33,8 +23,6 @@ void Server::registerClient(Client* client)
 ///////////////////////////////////////////////////////////////////////////////////
 // COMMANDS.CPP
 
-#include "Server_simon.hpp"
-#include "Client.hpp"
 
 void	Server::execPass(Client* client, const std::vector<std::string>& args)
 {

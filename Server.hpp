@@ -17,17 +17,17 @@
 #include <map>
 
 class Server
-{  
+{
 private:
     int _serverFd;
     int _port;
-    std::vector<pollfd> _pfds; // stock tous les fd et permet a ft poll de checker 
+    std::vector<pollfd> _pfds; // stock tous les fd et permet a ft poll de checker
     // std::map<int, Client> _clients;
 
     	typedef void (Server::*cmd_ptr)(Client* client, const std::vector<std::string>& args);
 		std::map<std::string, cmd_ptr>	_commands;
 		std::map<int, Client*>			_clients;
-		std::string						_password;
+		std::string						_password = "provisoire";
 
 public:
     Server(int port);
@@ -56,30 +56,9 @@ public:
 		void	registerClient(Client* client);
 };
 
-
-
-class Server
-{
-	private:
-		typedef void (Server::*cmd_ptr)(Client* client, const std::vector<std::string>& args);
-		std::map<std::string, cmd_ptr>	_commands;
-		std::map<int, Client*>			_clients;
-		std::string						_password;
-
-	public:
-		// Constructor and destructor
-		Server(std::string pass);
-		~Server(void);
-
-
-
-};
-
 std::string	str_toupper(std::string str);
 std::string	ft_trim(const std::string& str);
 std::vector<std::string> ft_split(const std::string& line);
 
 #endif
 
-
-#endif

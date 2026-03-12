@@ -1,12 +1,4 @@
-#include "Client.hpp"
-
-Client::Client(int fd) : _fd(fd)
-{
-}
-
-Client::~Client()
-{
-}
+#include "../Client.hpp"
 
 void Client::appendToInputBuffer(const char *data, int bytes)
 {
@@ -19,7 +11,7 @@ bool Client::hasCompleteLine() const
     return (_inputBuffer.find("\n") != std::string::npos);
 }
 
-// Pour IRC une ligne est strictement terminee par la "\r\n" 
+// Pour IRC une ligne est strictement terminee par la "\r\n"
 std::string Client::extractLine()
 {
     // size_t pos = _inputBuffer.find("\r\n");

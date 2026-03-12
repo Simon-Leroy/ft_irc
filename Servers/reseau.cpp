@@ -1,18 +1,5 @@
-#include "Server.hpp"
-#include "Client.hpp"
-
-Server::Server(int port) : _serverFd(-1), _port(port)
-{
-}
-
-Server::~Server()
-{
-    if (_serverFd >= 0)
-        close(_serverFd);
-
-    for (size_t i = 1; i < _pfds.size(); i++)
-        close(_pfds[i].fd);
-}
+#include "../Server.hpp"
+#include "../Client.hpp"
 
 //initier une socket (canal bi-lateral) et mettre sur ecoute sur le bon port
 void Server::initSocket()
@@ -26,7 +13,7 @@ void Server::initSocket()
     addr.sin_port = htons(_port); // convertir le port en bytes ordrer dureseau
     addr.sin_addr.s_addr = INADDR_ANY;
 
-    // lier la socket a l'adresse 
+    // lier la socket a l'adresse
     if (bind(_serverFd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
         throw std::runtime_error("bind failed");
 
@@ -67,7 +54,7 @@ void Server::acceptNewClient()
     int clientFd = accept(_serverFd, NULL, NULL);
     if (clientFd < 0)
         return;
-// init tous les attributs a 0 + ajouter client a la map 
+// init tous les attributs a 0 + ajouter client a la map
     std::cout << "Nouveau client connecté, fd = " << clientFd << std::endl;
 
     pollfd clientPoll;
@@ -90,7 +77,7 @@ void Server::removeClient(size_t i)
     _pfds.erase(_pfds.begin() + i); // retire de poll
 }
 // stocker dans BUffer les data recu du client grace a recv puis
-// appeler methode de la class Client pour save toutes les donnees (le reste de limplementation se fera dans Client) 
+// appeler methode de la class Client pour save toutes les donnees (le reste de limplementation se fera dans Client)
 void Server::handlePollEvent(size_t i)
 {
     int fd = _pfds[i].fd;
