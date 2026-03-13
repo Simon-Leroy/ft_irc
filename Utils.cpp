@@ -18,14 +18,20 @@ On cherche l'index du premier caractère qui n'est pas un whitespace
 -si on en trouve, on renvoie toute la chaine après cet index
 -sinon en renvoie une chaine de caractères vide (l'input contient
 alors uniquement des whitespaces) */
-std::string	ft_trim(const std::string& str)
+std::string ft_trim(const std::string& str)
 {
-	size_t found = str.find_first_not_of(" \t\n\r\v\f");
-
-	if (found != std::string::npos)
-		return (str.substr(found));
-	else
+	if (str.empty())
 		return "";
+
+	// On cherche le premier caractère "utile"
+	size_t first = str.find_first_not_of(" \t\n\r\v\f");
+	if (first == std::string::npos)
+		return "";
+
+	// On cherche le dernier caractère "utile"
+	size_t last = str.find_last_not_of(" \t\n\r\v\f");
+
+	return str.substr(first, (last - first + 1));
 }
 
 /*

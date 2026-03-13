@@ -3,6 +3,7 @@
 Server::Server(int port) : _serverFd(-1), _port(port)
 {
 	this->_password = "provisoire";
+    std::cout << "Password is '" << this->_password << "'" << std::endl;
     initCommands();
 }
 

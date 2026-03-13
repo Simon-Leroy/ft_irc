@@ -43,11 +43,14 @@ public:
         // Member functions
 		void	initCommands(void);
 		void	processInput(Client* client, std::string input);
+		void	sendResponse(Client* client, const std::string& message);
 
 		// Check nickname
 		bool	isNickUsed(const std::string& nick) const;
 
 		// Command functions
+		void	execJoin(Client* client, const std::vector<std::string>& args);
+		void	execCap(Client* client, const std::vector<std::string>& args);
 		void	execNick(Client* client, const std::vector<std::string>& args);
 		void	execPass(Client* client, const std::vector<std::string>& args);
 		void	execUser(Client* client, const std::vector<std::string>& args);

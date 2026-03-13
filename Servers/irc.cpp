@@ -1,6 +1,11 @@
 #include "../Server.hpp"
 #include "../Client.hpp"
 
+void	Server::sendResponse(Client *client, const std::string& message)
+{
+	send(client->getFd(), message.c_str(), message.length(), 0);
+}
+
 bool Server::isNickUsed(const std::string& nick) const
 {
 	std::map<int, Client*>::const_iterator it;
@@ -15,7 +20,10 @@ bool Server::isNickUsed(const std::string& nick) const
 void Server::registerClient(Client* client)
 {
 	client->setIsRegistered(true);
-	std::cout << "Welcome to server blabla -> message à envoyer avec send()" << std::endl;
+	std::string nick = client->getNickname();
+
+	std::string msg = ":localhost 001 " + nick + " :Welcome to the IRC Network, " + nick + "\r\n";
+	sendResponse(client, msg);
 	std::cout << "Client " << client->getFd() << " is registered as " << client->getNickname() << std::endl;
 }
 
@@ -23,26 +31,49 @@ void Server::registerClient(Client* client)
 ///////////////////////////////////////////////////////////////////////////////////
 // COMMANDS.CPP
 
+void	Server::execCap(Client* client, const std::vector<std::string>& args)
+{
+	if (args.size() > 1 && args[1] == "LS")
+	{
+		std::cout << "message envoyé" << std::endl;
+		sendResponse(client, ":localhost CAP * LS :\r\n");
+	}
+	else if (args.size() > 1 && args[1] == "END")
+	{
+		std::cout << "CAP finished" << std::endl;
+	}
+}
+
+void	Server::execJoin(Client* client, const std::vector<std::string>& args)
+{
+	(void)client;
+	(void)args;
+	std::cout << "JOIN command received and ignored" << std::endl;
+}
 
 void	Server::execPass(Client* client, const std::vector<std::string>& args)
 {
 	if (args.size() < 2)
 	{
+		sendResponse(client, "461 ERR_NEEDMOREPARAMS\r\n");
 		std::cerr << "461 ERR_NEEDMOREPARAMS --> erreur à renvoyer au serveur" << std::endl;
 		return ;
 	}
 	if (client->getIsRegistered() == true)
 	{
-		std::cerr << "462 ERR_ALREADYREGISTRED --> erreur à renvoyer au serveur" << std::endl;
+		sendResponse(client, "You are already registered\n");
+//		std::cerr << "462 ERR_ALREADYREGISTRED --> erreur à renvoyer au serveur" << std::endl;
 		return ;
 	}
 	if (args[1] != this->_password)
 	{
+		sendResponse(client, "Wrong password\n");
 		std::cout << "464 ERR_PASSWDMISMATCH --> erreur à renvoyer au serveur" << std::endl;
 		// ACTION A IMPLEMENTER? DECONNECTER LE CLIENT?
 		return ;
 	}
 	client->setHasPass(true);
+	sendResponse(client, "Password correct\r\n");
 	std::cout << "Client " << client->getFd() << " | Password correct" << std::endl;
 }
 
@@ -50,27 +81,32 @@ void	Server::execNick(Client* client, const std::vector<std::string>& args)
 {
 	if (args.size() < 2)
 	{
+		sendResponse(client, "461 ERR_NEEDMOREPARAMS\n");
 		std::cerr << "461 ERR_NEEDMOREPARAMS --> erreur à renvoyer au serveur" << std::endl;
 		return ;
 	}
 	if (!client->getHasPass())
 	{
+		sendResponse(client, "451 ERR_NOTREGISTERED\n");
 		std::cerr << "Client " << client->getFd() << " | 451 ERR_NOTREGISTERED" << std::endl;
 		return ;
 	}
 	if (isNickUsed(args[1]))
 	{
+		sendResponse(client, "433 ERR_NICKNAMEINUSE\n");
 		std::cerr << "Client " << client->getFd() << " | 433 ERR_NICKNAMEINUSE --> erreur à renvoyer au serveur" << std::endl;
 		return ;
 	}
 	if (client->getHasNickname())
 	{
 		client->setNickname(args[1]);
+		sendResponse(client, "nickname successfully changed\n");
 		std::cout << "Client " << client->getFd() << " changed his nickname to " << args[1] << std::endl;
 		return ;
 	}
 	client->setNickname(args[1]);
 	client->setHasNickname(true);
+	sendResponse(client, "nickname set\n");
 	std::cout << "Client " << client->getFd() << " set his nickname to " << args[1] << std::endl;
 }
 
@@ -78,11 +114,13 @@ void	Server::execUser(Client* client, const std::vector<std::string>& args)
 {
 	if (args.size() < 5)
 	{
+		sendResponse(client, "461 ERR_NEEDMOREPARAMS\n");
 		std::cerr << "461 ERR_NEEDMOREPARAMS --> erreur à renvoyer au client" << std::endl;
 		return ;
 	}
 	if (client->getIsRegistered())
 	{
+		sendResponse(client, "462 ERR_ALREADYREGISTRED\n");
 		std::cerr << "462 ERR_ALREADYREGISTRED --> erreur à renvoyer au serveur" << std::endl;
 		return ;
 	}
@@ -91,13 +129,7 @@ void	Server::execUser(Client* client, const std::vector<std::string>& args)
 	client->setHasUser(true);
 	if (client->getHasPass() && client->getHasNickname() && client->getHasUser())
 		registerClient(client);
-	std::cout << "fin execUser" << std::endl;
 }
-
-/* COMMANDES POUR TESTER
-
-Commandes qui vont être modifiées, print juste un message pour le moment */
-
 
 
 void	Server::execPrivmsg(Client* client, const std::vector<std::string>& args)
@@ -105,12 +137,16 @@ void	Server::execPrivmsg(Client* client, const std::vector<std::string>& args)
 	std::cout << "FD: " << client->getFd() << " | Arguments reçus pour commande Privmsg : " << args[1] << std::endl;
 }
 
+
+
 /*
 Fonction d'initialisation de la map contenant tous les pointeurs sur fonction
 des commandes qui peuvent être utilisées
 INCOMPLETE POUR LE MOMENT */
 void	Server::initCommands(void)
 {
+	_commands["JOIN"] = &Server::execJoin;
+	_commands["CAP"] = &Server::execCap;
 	_commands["PASS"] = &Server::execPass;
 	_commands["NICK"] = &Server::execNick;
 	_commands["USER"] = &Server::execUser;

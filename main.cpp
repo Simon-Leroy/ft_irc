@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
 int main(int ac, char **av)
-{  
+{
     if (ac != 2)
         return 1;
 
@@ -11,7 +11,7 @@ int main(int ac, char **av)
     server.run();
     return 0;
 }
-// attributs vecteurs a modifier ? 
-// 
+// attributs vecteurs a modifier ?
+//
 // non-blocking + buffers + passage des lignes au protocole + envoi + gestion des erreurs
-// 
+//

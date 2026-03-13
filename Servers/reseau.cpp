@@ -30,6 +30,7 @@ void Server::run()
     serverPoll.revents = 0;
 
     _pfds.push_back(serverPoll);
+    std::map<int, Client*>::iterator it;
 
     // boucle infini pour aouter les nouveaux clients
     while (true)
@@ -46,6 +47,7 @@ void Server::run()
             if (_pfds[i].revents & POLLIN)
                 handlePollEvent(i);
         }
+
     }
 }
 
@@ -95,10 +97,11 @@ void Server::handlePollEvent(size_t i)
 
     client->appendToInputBuffer(buffer, bytes);
 
-    if (client->hasCompleteLine())
+    while (client->hasCompleteLine())
     {
         std::string line = client->extractLine();
         std::cout << line << "\n";
+        processInput(client, line);
         // handleLine(fd, line);
     }
 }
