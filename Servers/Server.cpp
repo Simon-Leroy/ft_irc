@@ -1,8 +1,7 @@
 #include "../Server.hpp"
 
-Server::Server(int port) : _serverFd(-1), _port(port)
+Server::Server(int port) : _serverFd(-1), _port(port), _password("prov"), _serverName("ft_irc.42")
 {
-	this->_password = "provisoire";
     std::cout << "Password is '" << this->_password << "'" << std::endl;
     initCommands();
 }

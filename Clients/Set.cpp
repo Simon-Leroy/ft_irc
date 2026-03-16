@@ -44,6 +44,11 @@ std::string Client::getNickname(void) const
 	return this->_nickname;
 }
 
+std::string Client::getUsername(void) const
+{
+	return this->_username;
+}
+
 int Client::getFd(void) const
 {
 	return this->_fd;

@@ -1,8 +1,11 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
-#include <string>  
+#include <string>
 #include <map>
+#include <set>
+
+class Channel;
 
 class Client
 {
@@ -18,6 +21,7 @@ class Client
             bool		_hasPassword;
             bool		_hasUser;
             bool		_isRegistered;
+            std::set<Channel*>  _joinedChannels;
 
     public:
         Client() : _fd(-1) {} // important permet à std::map::operator[] de creer automatiquement un objet Client() quand la cle n’existe pas encore
@@ -31,9 +35,10 @@ class Client
         const std::string &getInputBuffer() const;
         const std::string &getOutputBuffer() const;
 
-            
+
             // Getters and setters
                 std::string	getNickname(void) const;
+                std::string getUsername(void) const;
                 int			getFd(void) const;
                 bool		getHasPass(void) const;
                 bool		getHasNickname(void) const;
@@ -49,6 +54,11 @@ class Client
                 void		setHasNickname(bool newStatus);
                 void		setHasUser(bool newStatus);
                 void		setIsRegistered(bool newStatus);
+
+                // Channels set handling
+                void        addChannel(Channel* chan);
+                void        removeChannel(Channel* chan);
+                const std::set<Channel*>& getChannels(void) const;
 };
 
 #endif

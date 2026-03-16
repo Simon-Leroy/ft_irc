@@ -3,13 +3,16 @@ NAME = ircserv
 SRCFILES = Clients/Client.cpp \
 			Clients/reseau.cpp \
 			Clients/Set.cpp \
+			Clients/irc.cpp \
 			Servers/irc.cpp \
 			Servers/reseau.cpp \
 			Servers/Server.cpp \
+			Channel.cpp \
 			Utils.cpp \
 			main.cpp
 
 HEADERS = Server.hpp \
+			Channel.hpp \
 			Client.hpp
 
 OBJFILES = $(SRCFILES:.cpp=.o)

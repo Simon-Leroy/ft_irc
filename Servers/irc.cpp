@@ -1,20 +1,20 @@
 #include "../Server.hpp"
 #include "../Client.hpp"
+#include "../Channel.hpp"
+#include "../Numerics.hpp"
 
 void	Server::sendResponse(Client *client, const std::string& message)
 {
 	send(client->getFd(), message.c_str(), message.length(), 0);
 }
 
-bool Server::isNickUsed(const std::string& nick) const
+void	Server::sendNumeric(Client* client, std::string code, std::string message)
 {
-	std::map<int, Client*>::const_iterator it;
-	for (it = _clients.begin(); it != _clients.end(); it++)
-	{
-		if (it->second->getNickname() == nick)
-			return true;
-	}
-	return false;
+	std::string nick = client->getNickname();
+	if (nick.empty())
+		nick = "*";
+	std::string finalMsg = ":" + this->_serverName + " " + code + " " + nick + " " + message + "\r\n";
+	send(client->getFd(), finalMsg.c_str(), finalMsg.length(), 0);
 }
 
 void Server::registerClient(Client* client)
@@ -22,8 +22,7 @@ void Server::registerClient(Client* client)
 	client->setIsRegistered(true);
 	std::string nick = client->getNickname();
 
-	std::string msg = ":localhost 001 " + nick + " :Welcome to the IRC Network, " + nick + "\r\n";
-	sendResponse(client, msg);
+	sendNumeric(client, RPL_WELCOME, ":Welcome to the IRC network");
 	std::cout << "Client " << client->getFd() << " is registered as " << client->getNickname() << std::endl;
 }
 
@@ -34,94 +33,71 @@ void Server::registerClient(Client* client)
 void	Server::execCap(Client* client, const std::vector<std::string>& args)
 {
 	if (args.size() > 1 && args[1] == "LS")
-	{
-		std::cout << "message envoyé" << std::endl;
 		sendResponse(client, ":localhost CAP * LS :\r\n");
-	}
 	else if (args.size() > 1 && args[1] == "END")
-	{
 		std::cout << "CAP finished" << std::endl;
-	}
-}
-
-void	Server::execJoin(Client* client, const std::vector<std::string>& args)
-{
-	(void)client;
-	(void)args;
-	std::cout << "JOIN command received and ignored" << std::endl;
 }
 
 void	Server::execPass(Client* client, const std::vector<std::string>& args)
 {
 	if (args.size() < 2)
 	{
-		sendResponse(client, "461 ERR_NEEDMOREPARAMS\r\n");
-		std::cerr << "461 ERR_NEEDMOREPARAMS --> erreur à renvoyer au serveur" << std::endl;
+		sendNumeric(client, ERR_NEEDMOREPARAMS, "PASS :Not enough parameters");
 		return ;
 	}
 	if (client->getIsRegistered() == true)
 	{
-		sendResponse(client, "You are already registered\n");
-//		std::cerr << "462 ERR_ALREADYREGISTRED --> erreur à renvoyer au serveur" << std::endl;
+		sendNumeric(client, ERR_ALREADYREGISTERED, "PASS :Already registered");
 		return ;
 	}
 	if (args[1] != this->_password)
 	{
-		sendResponse(client, "Wrong password\n");
-		std::cout << "464 ERR_PASSWDMISMATCH --> erreur à renvoyer au serveur" << std::endl;
-		// ACTION A IMPLEMENTER? DECONNECTER LE CLIENT?
+		sendNumeric(client, ERR_PASSWDMISMATCH, ":Password incorrect");
 		return ;
 	}
 	client->setHasPass(true);
-	sendResponse(client, "Password correct\r\n");
-	std::cout << "Client " << client->getFd() << " | Password correct" << std::endl;
 }
 
 void	Server::execNick(Client* client, const std::vector<std::string>& args)
 {
 	if (args.size() < 2)
 	{
-		sendResponse(client, "461 ERR_NEEDMOREPARAMS\n");
-		std::cerr << "461 ERR_NEEDMOREPARAMS --> erreur à renvoyer au serveur" << std::endl;
+		sendNumeric(client, ERR_NEEDMOREPARAMS, "NICK :Not enough parameters");
 		return ;
 	}
 	if (!client->getHasPass())
 	{
-		sendResponse(client, "451 ERR_NOTREGISTERED\n");
-		std::cerr << "Client " << client->getFd() << " | 451 ERR_NOTREGISTERED" << std::endl;
+		sendNumeric(client, ERR_NOTREGISTERED, "NICK :Not registered");
 		return ;
 	}
-	if (isNickUsed(args[1]))
+	std::string newNick = args[1];
+	if (isNickUsed(newNick))
 	{
-		sendResponse(client, "433 ERR_NICKNAMEINUSE\n");
-		std::cerr << "Client " << client->getFd() << " | 433 ERR_NICKNAMEINUSE --> erreur à renvoyer au serveur" << std::endl;
+		sendNumeric(client, ERR_NICKNAMEINUSE, newNick + " :Nickname already in use");
 		return ;
 	}
-	if (client->getHasNickname())
+	if (client->getIsRegistered())
 	{
+		std::string msg = ":" + client->getNickname() + "!" + client->getUsername() + "@"
+						+ this->_serverName + " NICK " + newNick + "\r\n";
 		client->setNickname(args[1]);
-		sendResponse(client, "nickname successfully changed\n");
-		std::cout << "Client " << client->getFd() << " changed his nickname to " << args[1] << std::endl;
+		notifyAllChans(client, msg);
 		return ;
 	}
 	client->setNickname(args[1]);
 	client->setHasNickname(true);
-	sendResponse(client, "nickname set\n");
-	std::cout << "Client " << client->getFd() << " set his nickname to " << args[1] << std::endl;
 }
 
 void	Server::execUser(Client* client, const std::vector<std::string>& args)
 {
 	if (args.size() < 5)
 	{
-		sendResponse(client, "461 ERR_NEEDMOREPARAMS\n");
-		std::cerr << "461 ERR_NEEDMOREPARAMS --> erreur à renvoyer au client" << std::endl;
+		sendNumeric(client, ERR_NEEDMOREPARAMS, "USER :Not enough parameters");
 		return ;
 	}
 	if (client->getIsRegistered())
 	{
-		sendResponse(client, "462 ERR_ALREADYREGISTRED\n");
-		std::cerr << "462 ERR_ALREADYREGISTRED --> erreur à renvoyer au serveur" << std::endl;
+		sendNumeric(client, ERR_ALREADYREGISTERED, "USER :Already registered");
 		return ;
 	}
 	client->setUsername(args[1]);
@@ -131,10 +107,161 @@ void	Server::execUser(Client* client, const std::vector<std::string>& args)
 		registerClient(client);
 }
 
+/* ===== PRIVMSG & CHANNELMSG ===== */
 
 void	Server::execPrivmsg(Client* client, const std::vector<std::string>& args)
 {
-	std::cout << "FD: " << client->getFd() << " | Arguments reçus pour commande Privmsg : " << args[1] << std::endl;
+	if (args.size() < 2)
+	{
+		sendNumeric(client, ERR_NORECIPIENT, "PRIVMSG :No recipient given");
+		return ;
+	}
+	if (args.size() < 3 || args[2].empty())
+	{
+		sendNumeric(client, ERR_NOTEXTTOSEND, "PRIVMSG :No text to send");
+		return ;
+	}
+
+	std::string target = args[1];
+	std::string text = args[2];
+	std::string senderPrefix = ":" + client->getNickname() + "!" + client->getUsername() + "@" + this->_serverName;
+
+	if (target[0] == '#')
+	{
+		if (!channelExists(target))
+		{
+			sendNumeric(client, ERR_NOSUCHCHANNEL, "PRIVMSG :No such channel");
+			return ;
+		}
+		Channel* chan = _channels[target];
+		if (!chan->isClientInChannel(client->getFd()))
+		{
+			sendNumeric(client, ERR_CANNOTSENDTOCHAN, target + " :Cannot send to channel");
+			return ;
+		}
+		std::string msg = senderPrefix + " PRIVMSG " + target + ":" + text + "\r\n";
+		chan->broadcastMsg(client, msg);
+	}
+	else
+	{
+		Client* recipient = findClientFromNick(args[1]);
+		if (!recipient)
+		{
+			sendNumeric(client, ERR_NOSUCHNICK, "PRIVMSG :Recipient not found");
+			return ;
+		}
+		std::string msg = ":" + client->getNickname() + " PRIVMSG " + recipient->getNickname() + " :" + args[2] + "\r\n";
+		sendResponse(recipient, msg);
+	}
+}
+
+/* =============================================================================== */
+
+/* ENCORE A GERER QUAND PARAMETRE SUPPLEMENTAIRE */
+void Server::execJoin(Client* client, const std::vector<std::string>& args)
+{
+	if (args.size() < 2)
+	{
+		sendNumeric(client, ERR_NEEDMOREPARAMS, "JOIN :Not enough parameters");
+		return ;
+	}
+
+	std::string chanName = args[1];
+	if (chanName[0] != '#')
+	{
+		sendNumeric(client, ERR_NOSUCHCHANNEL, "JOIN :No such channel");
+		return ;
+	}
+	if (!channelExists(chanName))
+	{
+		createChannel(client, chanName);
+		return ;
+	}
+
+	Channel* chan = _channels[chanName];
+	if (chan->isClientInChannel(client->getFd()))
+		return ;
+	chan->pushClientToMembers(client);
+	client->addChannel(chan);
+
+	std::string msg = ":" + client->getNickname() + "!" + client->getUsername()
+					+ "@" + _serverName + " JOIN " + chanName + "\r\n";
+	chan->broadcastMsg(client, msg);
+
+	//AJOUTER INFOS SUR LE SERVEUR A RENVOYER A IRSSI
+}
+
+void	Server::createChannel(Client* client, const std::string& channelName)
+{
+	Channel* chan = new Channel(channelName);
+	chan->pushClientToMembers(client);
+	chan->addOperator(client->getFd());
+	client->addChannel(chan);
+	_channels[channelName] = chan;
+	std::string msg = ":" + client->getNickname() + "!" + client->getUsername()
+					+ "@" + _serverName + " JOIN " + channelName + "\r\n";
+	sendResponse(client, msg);
+}
+
+
+void	Server::execKick(Client* client, const std::vector<std::string>& args)
+{
+	if (args.size() < 3)
+	{
+		sendResponse(client, "461 ERR_NEEDMOREPARAMS\r\n");
+		return ;
+	}
+	std::string chanName = args[1];
+	std::string targetNick = args[2];
+
+	if (!channelExists(chanName))
+	{
+		sendNumeric(client, ERR_NOSUCHCHANNEL, "KICK :No such channel");
+		return;
+	}
+
+	Channel* chan = _channels[chanName];
+	if (!chan->isClientInChannel(client->getFd()))
+	{
+		sendNumeric(client, ERR_NOTONCHANNEL, "KICK :User not on channel");
+		return ;
+	}
+	if (!chan->isOperator(client->getFd()))
+	{
+		sendNumeric(client, ERR_CHANOPRIVSNEEDED, "KICK :Operator privilege needed");
+		return ;
+	}
+
+	Client* toKick = findClientFromNick(args[2]);
+	if (!toKick)
+	{
+		sendNumeric(client, ERR_NOSUCHNICK, "KICK :User not found");
+		return ;
+	}
+	if (!chan->isClientInChannel(toKick->getFd()))
+	{
+		sendNumeric(client, ERR_USERNOTINCHANNEL, "KICK :User not in channel");
+		return ;
+	}
+	std::string reason;
+	if (args.size() > 3)
+		reason = args[3];
+	else
+		reason = "Kicked by operator";
+	std::string msg = ":" + client->getNickname() + " KICK " + chanName + " " + targetNick + " :" + reason + "\r\n";
+	chan->broadcastMsg(NULL, msg);
+	chan->kickClient(toKick);
+}
+
+void Server::execPong(Client* client, const std::vector<std::string>& args)
+{
+	if (args.size() < 2)
+	{
+		sendResponse(client, "461 ERR_NEEDMOREPARAMS");
+		return ;
+	}
+	std::string msg = ":localhost PONG localhost :" + args[1] + "\r\n";
+	sendResponse(client, msg);
 }
 
 
@@ -146,11 +273,13 @@ INCOMPLETE POUR LE MOMENT */
 void	Server::initCommands(void)
 {
 	_commands["JOIN"] = &Server::execJoin;
+	_commands["KICK"] = &Server::execKick;
 	_commands["CAP"] = &Server::execCap;
 	_commands["PASS"] = &Server::execPass;
 	_commands["NICK"] = &Server::execNick;
 	_commands["USER"] = &Server::execUser;
 	_commands["PRIVMSG"] = &Server::execPrivmsg;
+	_commands["PING"] = &Server::execPong;
 }
 
 /*
@@ -178,8 +307,59 @@ void	Server::processInput(Client* client, std::string input)
 		return;
 	}
 	std::string cmdName = str_toupper(tokens[0]);
+	if (!client->getIsRegistered()
+		&& cmdName != "PASS" && cmdName != "NICK" && cmdName != "USER" && cmdName != "CAP")
+	{
+		sendNumeric(client, ERR_NOTREGISTERED, ":Not registered");
+		return ;
+	}
 	if (_commands.count(cmdName))
 		(this->*_commands[cmdName])(client, tokens);
 	else
 		std::cerr << "Unknown command" << std::endl;
+}
+
+
+/* POTENTIELLEMENT A CHANGER POUR .find() */
+Client* Server::findClientFromNick(const std::string& nick) const
+{
+	std::map<int, Client*>::const_iterator it;
+
+	for (it = _clients.begin(); it != _clients.end(); it++)
+	{
+		if (it->second->getNickname() == nick)
+			return it->second;
+	}
+	return NULL;
+}
+
+bool Server::isNickUsed(const std::string& nick) const
+{
+	if (nick.empty())
+		return false;
+	std::map<int, Client*>::const_iterator it;
+	for (it = _clients.begin(); it != _clients.end(); it++)
+	{
+		if (it->second->getNickname() == nick)
+			return true;
+	}
+	return false;
+}
+
+bool Server::channelExists(const std::string& channelName) const
+{
+	return (_channels.find(channelName) != _channels.end());
+}
+
+void Server::notifyAllChans(Client* client, const std::string& msg)
+{
+	std::set<int> alreadySent;
+	const std::set<Channel*>& joinedChans = client->getChannels();
+
+	sendResponse(client, msg);
+	alreadySent.insert(client->getFd());
+	for (std::set<Channel*>::const_iterator it = joinedChans.begin(); it != joinedChans.end(); ++it)
+	{
+		(*it)->broadcastMsgStrict(client, msg, alreadySent);
+	}
 }
