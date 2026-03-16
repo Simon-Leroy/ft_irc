@@ -25,7 +25,6 @@ void Channel::kickClient(Client *client)
 A MODIFIER POUR AJOUTER LE MESSAGE DANS L'OUTPUT BUFFER */
 void	Channel::broadcastMsg(Client* sender, const std::string& msg)
 {
-	std::cout << "ca broadcast ou quoi" << std::endl;
 	std::map<int, Client*>::iterator it;
 	for(it = _members.begin(); it != _members.end(); it++)
 	{

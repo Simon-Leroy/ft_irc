@@ -23,7 +23,7 @@ void Server::registerClient(Client* client)
 	std::string nick = client->getNickname();
 
 	sendNumeric(client, RPL_WELCOME, ":Welcome to the IRC network");
-	std::cout << "Client " << client->getFd() << " is registered as " << client->getNickname() << std::endl;
+/* 	std::cout << "Client " << client->getFd() << " is registered as " << client->getNickname() << std::endl; */
 }
 
 
@@ -139,7 +139,7 @@ void	Server::execPrivmsg(Client* client, const std::vector<std::string>& args)
 			sendNumeric(client, ERR_CANNOTSENDTOCHAN, target + " :Cannot send to channel");
 			return ;
 		}
-		std::string msg = senderPrefix + " PRIVMSG " + target + ":" + text + "\r\n";
+		std::string msg = senderPrefix + " PRIVMSG " + target + " :" + text + "\r\n";
 		chan->broadcastMsg(client, msg);
 	}
 	else
@@ -147,10 +147,10 @@ void	Server::execPrivmsg(Client* client, const std::vector<std::string>& args)
 		Client* recipient = findClientFromNick(args[1]);
 		if (!recipient)
 		{
-			sendNumeric(client, ERR_NOSUCHNICK, "PRIVMSG :Recipient not found");
+			sendNumeric(client, ERR_NOSUCHNICK, target + " :Recipient not found");
 			return ;
 		}
-		std::string msg = ":" + client->getNickname() + " PRIVMSG " + recipient->getNickname() + " :" + args[2] + "\r\n";
+		std::string msg = senderPrefix + " PRIVMSG " + recipient->getNickname() + " :" + text + "\r\n";
 		sendResponse(recipient, msg);
 	}
 }
@@ -186,7 +186,7 @@ void Server::execJoin(Client* client, const std::vector<std::string>& args)
 
 	std::string msg = ":" + client->getNickname() + "!" + client->getUsername()
 					+ "@" + _serverName + " JOIN " + chanName + "\r\n";
-	chan->broadcastMsg(client, msg);
+	chan->broadcastMsg(NULL, msg);
 
 	//AJOUTER INFOS SUR LE SERVEUR A RENVOYER A IRSSI
 }
@@ -208,7 +208,7 @@ void	Server::execKick(Client* client, const std::vector<std::string>& args)
 {
 	if (args.size() < 3)
 	{
-		sendResponse(client, "461 ERR_NEEDMOREPARAMS\r\n");
+		sendNumeric(client, ERR_NEEDMOREPARAMS, "KICK :Not enough parameters");
 		return ;
 	}
 	std::string chanName = args[1];
@@ -256,11 +256,8 @@ void	Server::execKick(Client* client, const std::vector<std::string>& args)
 void Server::execPong(Client* client, const std::vector<std::string>& args)
 {
 	if (args.size() < 2)
-	{
-		sendResponse(client, "461 ERR_NEEDMOREPARAMS");
 		return ;
-	}
-	std::string msg = ":localhost PONG localhost :" + args[1] + "\r\n";
+	std::string msg = ":" + this->_serverName + " PONG " + this->_serverName + " :" + args[1] + "\r\n";
 	sendResponse(client, msg);
 }
 
