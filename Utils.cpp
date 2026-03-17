@@ -81,3 +81,13 @@ std::vector<std::string> ft_split(const std::string& line)
 	}
 	return tokens;
 }
+
+std::string getReadableTime(time_t rawtime)
+{
+	char buffer[80];
+	struct tm * timeinfo;
+
+	timeinfo = std::localtime(&rawtime); // Convertit le timestamp en structure (heure, min, sec...)
+	std::strftime(buffer, 80, "%d/%m/%Y %H:%M:%S", timeinfo);
+	return std::string(buffer);
+}

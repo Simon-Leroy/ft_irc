@@ -69,6 +69,8 @@ public:
 		void	execUser(Client* client, const std::vector<std::string>& args);
 		void	execPrivmsg(Client* client, const std::vector<std::string>& args);
 		void	execPong(Client* client, const std::vector<std::string>& args);
+		void	execTopic(Client* client, const std::vector<std::string>& args);
+		void	execInvite(Client* client, const std::vector<std::string>& args);
 
 		void	registerClient(Client* client);
 };

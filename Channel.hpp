@@ -5,6 +5,8 @@
 #include <map>
 #include <set>
 #include <sys/socket.h>
+#include <ctime>
+#include <sstream>
 
 class Client;
 
@@ -13,7 +15,12 @@ class Channel
 	private:
 		std::string				_channelName;
 		std::map<int, Client*>	_members;
-		std::set<int>			 _operatorsFd;
+		std::map<char, bool>	_modes;
+		std::set<int>			_operatorsFd;
+		std::set<std::string>	_inviteList;
+		std::string				_topic;
+		std::string				_topicSetter;
+		time_t					_topicTime;
 
 	public:
 		Channel(const std::string& channelName);
@@ -29,8 +36,19 @@ class Channel
 		void	addOperator(int fd);
 		void	removeOperator(int fd);
 
+		void	addToInviteList(std::string nickname);
+		void	removeFromInviteList(std::string nickname);
+
+		void				setTopic(const std::string& newTopic, const std::string& setter);
+		const std::string&	getTopic(void) const;
+		const std::string&	getTopicSetter(void) const;
+		time_t				getTopicTime(void) const;
+
+		bool	hasMode(char mode);
+
 
 };
 
+std::string	getReadableTime(time_t rawtime);
 
 #endif

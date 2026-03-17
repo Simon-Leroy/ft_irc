@@ -79,12 +79,12 @@ void	Server::execNick(Client* client, const std::vector<std::string>& args)
 	if (client->getIsRegistered())
 	{
 		std::string msg = ":" + client->getNickname() + "!" + client->getUsername() + "@"
-						+ this->_serverName + " NICK " + newNick + "\r\n";
-		client->setNickname(args[1]);
+						+ "127.0.0.1" + " NICK " + newNick + "\r\n";
+		client->setNickname(newNick);
 		notifyAllChans(client, msg);
 		return ;
 	}
-	client->setNickname(args[1]);
+	client->setNickname(newNick);
 	client->setHasNickname(true);
 }
 
@@ -261,7 +261,97 @@ void Server::execPong(Client* client, const std::vector<std::string>& args)
 	sendResponse(client, msg);
 }
 
+void Server::execTopic(Client* client, const std::vector<std::string>& args)
+{
+	if (args.size() < 2)
+	{
+		sendNumeric(client, ERR_NEEDMOREPARAMS, "TOPIC :Not enough parameters");
+		return ;
+	}
 
+	std::string chanName = args[1];
+	if (!channelExists(chanName))
+	{
+		sendNumeric(client, ERR_NOSUCHCHANNEL, "TOPIC :No such channel");
+		return;
+	}
+	Channel* chan = _channels[chanName];
+	if (!chan->isClientInChannel(client->getFd()))
+	{
+		sendNumeric(client, ERR_NOTONCHANNEL, "TOPIC :Not in channel");
+		return ;
+	}
+	if (args.size() >= 3)
+	{
+		if (chan->hasMode('t') && !chan->isOperator(client->getFd()))
+		{
+			sendNumeric(client, ERR_CHANOPRIVSNEEDED, chanName + " :Operator privilege nedeed");
+			return ;
+		}
+		std::string newTopic = args[2];
+		chan->setTopic(newTopic, client->getNickname());
+		std::string notif = ":" + client->getNickname() + "!" + client->getUsername()
+							+ "@" + this->_serverName + " TOPIC " + chanName
+							+ " :" + newTopic + "\r\n";
+		chan->broadcastMsg(NULL, notif);
+	}
+	else // READ TOPIC ONLY (pas besoin d'être opérateur)
+	{
+		if (chan->getTopic().empty())
+		{
+			sendNumeric(client, RPL_NOTOPIC, chanName + ":No topic is set");
+			return ;
+		}
+		sendNumeric(client, RPL_TOPIC, chanName + " :" + chan->getTopic());
+		std::string msg = chanName + " " + chan->getTopicSetter() + " "
+						+ getReadableTime(chan->getTopicTime());
+		sendNumeric(client, RPL_TOPICWHOTIME, msg.c_str());
+	}
+}
+
+void Server::execInvite(Client* client, const std::vector<std::string>& args)
+{
+	if (args.size() < 3)
+	{
+		sendNumeric(client, ERR_NEEDMOREPARAMS, "INVITE :Not enough parameters");
+		return ;
+	}
+
+	std::string chanName = args[2];
+	if (!channelExists(chanName))
+	{
+		sendNumeric(client, ERR_NOSUCHCHANNEL, "INVITE :No such channel");
+		return;
+	}
+	Channel* chan = _channels[chanName];
+	if (!chan->isClientInChannel(client->getFd()))
+	{
+		sendNumeric(client, ERR_USERNOTINCHANNEL, "INVITE :Not in channel");
+		return ;
+	}
+	if (chan->hasMode('i') && !chan->isOperator(client->getFd()))
+	{
+			sendNumeric(client, ERR_CHANOPRIVSNEEDED, chanName + " :Operator privilege nedeed");
+			return ;
+	}
+	Client* target = findClientFromNick(args[1]);
+	if (!target)
+	{
+		sendNumeric(client, ERR_NOSUCHNICK, args[1] + " :No such nick");
+		return ;
+	}
+	if (chan->isClientInChannel(target->getFd()))
+	{
+		sendNumeric(client, ERR_USERONCHANNEL, target->getNickname() + " " + chanName + " :User already in channel");
+		return ;
+	}
+	chan->addToInviteList(target->getNickname());
+	std::string inviteMsg = ":" + client->getNickname() + "!" + client->getUsername()
+							+ "@" + this->_serverName + " INVITE " + target->getNickname()
+							+ " :" + chanName + "\r\n";
+	sendResponse(target, inviteMsg.c_str());
+	sendNumeric(client, RPL_INVITING, target->getNickname() + " " + chanName);
+}
 
 /*
 Fonction d'initialisation de la map contenant tous les pointeurs sur fonction
@@ -277,6 +367,8 @@ void	Server::initCommands(void)
 	_commands["USER"] = &Server::execUser;
 	_commands["PRIVMSG"] = &Server::execPrivmsg;
 	_commands["PING"] = &Server::execPong;
+	_commands["TOPIC"] = &Server::execTopic;
+	_commands["INVITE"] = &Server::execInvite;
 }
 
 /*

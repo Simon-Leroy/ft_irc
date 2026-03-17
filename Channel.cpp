@@ -3,7 +3,9 @@
 
 Channel::Channel(const std::string& channelName): _channelName(channelName)
 {
-
+	this->_modes['t'] = true;
+	this->_modes['i'] = false;
+	this->_modes['k'] = false;
 }
 
 Channel::~Channel()
@@ -67,4 +69,44 @@ void Channel::addOperator(int fd)
 void Channel::removeOperator(int fd)
 {
 	_operatorsFd.erase(fd);
+}
+
+void Channel::setTopic(const std::string& newTopic, const std::string& setter)
+{
+	this->_topic = newTopic;
+	this->_topicSetter = setter;
+	this->_topicTime = std::time(0);
+}
+
+const std::string& Channel::getTopic() const
+{
+	return this->_topic;
+}
+
+const std::string& Channel::getTopicSetter() const
+{
+	return this->_topicSetter;
+}
+
+long Channel::getTopicTime() const
+{
+	return this->_topicTime;
+}
+bool Channel::hasMode(char mode)
+{
+	if (this->_modes.count(mode) > 0)
+	{
+		return _modes[mode];
+	}
+	return false;
+}
+
+void Channel::addToInviteList(std::string nickname)
+{
+	_inviteList.insert(nickname);
+}
+
+void Channel::removeFromInviteList(std::string nickname)
+{
+	_inviteList.erase(nickname);
 }
