@@ -110,3 +110,27 @@ void Channel::removeFromInviteList(std::string nickname)
 {
 	_inviteList.erase(nickname);
 }
+
+bool Channel::isClientInList(std::string nickname)
+{
+	return (_inviteList.find(nickname) != _inviteList.end());
+}
+
+size_t	Channel::getNumberMembers(void) const
+{
+	return this->_numberMembers;
+}
+
+size_t	Channel::getLimitMembers(void) const
+{
+	return this->_limitMembers;
+}
+
+void	Channel::incrementNumberMembers(void)
+{
+	this->_numberMembers++;
+}
+void	Channel::decrementNumberMembers(void)
+{
+	this->_numberMembers--;
+}

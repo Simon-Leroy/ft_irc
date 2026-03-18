@@ -162,14 +162,14 @@ void Server::execJoin(Client* client, const std::vector<std::string>& args)
 {
 	if (args.size() < 2)
 	{
-		sendNumeric(client, ERR_NEEDMOREPARAMS, "JOIN :Not enough parameters");
+		sendNumeric(client, ERR_NEEDMOREPARAMS, " :Not enough parameters");
 		return ;
 	}
 
 	std::string chanName = args[1];
 	if (chanName[0] != '#')
 	{
-		sendNumeric(client, ERR_NOSUCHCHANNEL, "JOIN :No such channel");
+		sendNumeric(client, ERR_NOSUCHCHANNEL, chanName + " :No such channel");
 		return ;
 	}
 	if (!channelExists(chanName))
@@ -181,14 +181,33 @@ void Server::execJoin(Client* client, const std::vector<std::string>& args)
 	Channel* chan = _channels[chanName];
 	if (chan->isClientInChannel(client->getFd()))
 		return ;
+	if (chan->hasMode('i') && !chan->isClientInList(client->getNickname()))
+	{
+		sendNumeric(client, ERR_INVITEONLYCHAN, chanName + " :Cannot join channel (+i)");
+		return ;
+	}
+	if (chan->hasMode('l') && chan->getNumberMembers() == chan->getLimitMembers())
+	{
+		sendNumeric(client, ERR_CHANNELISFULL, chanName + " :Cannot join channel (+l)");
+		return ;
+	}
 	chan->pushClientToMembers(client);
+	chan->removeFromInviteList(client->getNickname());
 	client->addChannel(chan);
+	chan->incrementNumberMembers();
 
 	std::string msg = ":" + client->getNickname() + "!" + client->getUsername()
 					+ "@" + _serverName + " JOIN " + chanName + "\r\n";
 	chan->broadcastMsg(NULL, msg);
+	if (!chan->getTopic().empty())
+	{
+		sendNumeric(client, RPL_TOPIC, chanName + " :" + chan->getTopic());
+		std::string msg = chanName + " " + chan->getTopicSetter() + " "
+						+ getReadableTime(chan->getTopicTime());
+		sendNumeric(client, RPL_TOPICWHOTIME, msg.c_str());
+	}
 
-	//AJOUTER INFOS SUR LE SERVEUR A RENVOYER A IRSSI
+	//ENVOYER LA LISTE DES MEMBRES DU CHANNEL
 }
 
 void	Server::createChannel(Client* client, const std::string& channelName)
@@ -251,6 +270,8 @@ void	Server::execKick(Client* client, const std::vector<std::string>& args)
 	std::string msg = ":" + client->getNickname() + " KICK " + chanName + " " + targetNick + " :" + reason + "\r\n";
 	chan->broadcastMsg(NULL, msg);
 	chan->kickClient(toKick);
+	toKick->removeChannel(chan);
+	chan->decrementNumberMembers();
 }
 
 void Server::execPong(Client* client, const std::vector<std::string>& args)

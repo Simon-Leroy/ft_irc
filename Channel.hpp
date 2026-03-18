@@ -21,6 +21,8 @@ class Channel
 		std::string				_topic;
 		std::string				_topicSetter;
 		time_t					_topicTime;
+		size_t					_numberMembers;
+		size_t					_limitMembers;
 
 	public:
 		Channel(const std::string& channelName);
@@ -38,6 +40,12 @@ class Channel
 
 		void	addToInviteList(std::string nickname);
 		void	removeFromInviteList(std::string nickname);
+		bool	isClientInList(std::string nickname);
+
+		size_t	getNumberMembers(void) const;
+		size_t	getLimitMembers(void) const;
+		void	incrementNumberMembers(void);
+		void	decrementNumberMembers(void);
 
 		void				setTopic(const std::string& newTopic, const std::string& setter);
 		const std::string&	getTopic(void) const;
