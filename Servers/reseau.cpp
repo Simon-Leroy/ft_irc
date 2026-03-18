@@ -60,10 +60,10 @@ void Server::run()
             if (_pfds.size() != oldSize)
                 continue;
 
-            if (revents & POLLOUT)
-            {
-                handleWriteEvent(i);
-            }
+            // if (revents & POLLOUT)
+            // {
+            //     handleWriteEvent(i);
+            // }
             i++;    
         }
     }
@@ -136,42 +136,42 @@ void Server::handleReadEvent(size_t i)
     }
 }
 
-void Server::handleWriteEvent(size_t i)
-{
-    // 1. récupérer le fd et le client
-    // 2. vérifier s’il y a quelque chose à envoyer
-    // 3. appeler send()
-    // 4. en fontion de ce que return send, supprimer POLL OUTou continuer de conserver les donnees etc
+// void Server::handleWriteEvent(size_t i)
+// {
+//     // 1. récupérer le fd et le client
+//     // 2. vérifier s’il y a quelque chose à envoyer
+//     // 3. appeler send()
+//     // 4. en fontion de ce que return send, supprimer POLL OUTou continuer de conserver les donnees etc
 
    
-    //     int fd = _pfds[i].fd;
-    //     Client* client = _clients[fd];
+//     //     int fd = _pfds[i].fd;
+//     //     Client* client = _clients[fd];
 
-    //     std::string& out = client->getOutputBuffer();
+//     //     std::string& out = client->getOutputBuffer();
 
-    //     if (out.empty())
-    //     {
-    //         _pfds[i].events &= ~POLLOUT;
-    //         return;
-    //     }
+//     //     if (out.empty())
+//     //     {
+//     //         _pfds[i].events &= ~POLLOUT;
+//     //         return;
+//     //     }
 
-    //     ssize_t bytesSent = send(fd, out.c_str(), out.size(), 0);
+//     //     ssize_t bytesSent = send(fd, out.c_str(), out.size(), 0);
 
-    //     if (bytesSent > 0)
-    //     {
-    //         out.erase(0, bytesSent);
+//     //     if (bytesSent > 0)
+//     //     {
+//     //         out.erase(0, bytesSent);
 
-    //         if (out.empty())
-    //             _pfds[i].events &= ~POLLOUT;
+//     //         if (out.empty())
+//     //             _pfds[i].events &= ~POLLOUT;
 
-    //         return;
-    //     }
+//     //         return;
+//     //     }
 
-    //     if (bytesSent < 0)
-    //     {
-    //         if (errno == EAGAIN || errno == EWOULDBLOCK)
-    //             return;
+//     //     if (bytesSent < 0)
+//     //     {
+//     //         if (errno == EAGAIN || errno == EWOULDBLOCK)
+//     //             return;
 
-    //         removeClient(i);
-    //     }
-}
+//     //         removeClient(i);
+//     //     }
+// }

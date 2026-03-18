@@ -17,6 +17,8 @@
 #include <cstdlib>        // NULL
 #include <map>
 
+#include <fcntl.h>
+
 class Server
 {
 private:
@@ -40,7 +42,9 @@ public:
     void run();
     void acceptNewClient();
     void removeClient(size_t i);
-    void handlePollEvent(size_t i);
+    void handleReadEvent(size_t i);
+    void handleWriteEvent(size_t i);
+
     //penser a une fonction permettant de ne pas bloquer le fd serveur/client (ca evite de bloquer le flux pcq en att de msg sur 1 fd specifique)
 
         // Member functions
