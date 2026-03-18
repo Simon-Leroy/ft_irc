@@ -30,24 +30,42 @@ void Server::run()
     serverPoll.revents = 0;
 
     _pfds.push_back(serverPoll);
-    std::map<int, Client*>::iterator it;
 
-    // boucle infini pour aouter les nouveaux clients
+    // boucle infini pour ajouter les nouveaux clients
     while (true)
     {
-        if (poll(_pfds.data(), _pfds.size(), -1) < 0) // ATTENTIOn, il faudrq que je passe a 0 pkutt qe -1 pour du non bloquant
+        if (poll(_pfds.data(), _pfds.size(), -1) < 0) // -1 -> poll dort tant que aucun event 
             throw std::runtime_error("poll failed");
 
-        if (_pfds[0].revents & POLLIN) // verif qu'un fag POLLIN (demande de connexion) est bien present dans le revents
+        if (_pfds[0].revents & POLLIN) // verif qu'un flag POLLIN (demande de connexion) est bien present dans le revents de la socket serveur
             acceptNewClient();
 
-        // si une socket contient un revent avec le flag POLLIN, on va retirer les donnees
-        for (size_t i = 1; i < _pfds.size(); i++)
+        // gestion de l'index manuel car removeClient replace la place de lelement supprime par un autre
+        for (size_t i = 1; i < _pfds.size(); )
         {
-            if (_pfds[i].revents & POLLIN)
-                handlePollEvent(i);
-        }
+            short revents = _pfds[i].revents;
+            size_t oldSize = _pfds.size();
 
+            if (revents & (POLLERR | POLLHUP | POLLNVAL))
+            {
+                removeClient(i); // gestion des erreurs comme RFC 
+                continue;
+            }
+
+            if (revents & POLLIN)
+            {
+                handleReadEvent(i);
+            }
+            //car handleReadEvent peutfaire un reove clienet donc modif lelemnt a lindex
+            if (_pfds.size() != oldSize)
+                continue;
+
+            if (revents & POLLOUT)
+            {
+                handleWriteEvent(i);
+            }
+            i++;    
+        }
     }
 }
 
@@ -55,9 +73,22 @@ void Server::acceptNewClient()
 {
     int clientFd = accept(_serverFd, NULL, NULL);
     if (clientFd < 0)
-        return;
-// init tous les attributs a 0 + ajouter client a la map
+        return; // Ajout gestion de l'erreur
+
+    // init tous les attributs a 0 + ajouter client a la map
     std::cout << "Nouveau client connecté, fd = " << clientFd << std::endl;
+
+    int flags = fcntl(clientFd, F_GETFL);
+    if (flags == -1)
+    {
+        close(clientFd);
+        return;
+    }
+    if (fcntl(clientFd, F_SETFL, flags | O_NONBLOCK) == -1)
+    {
+        close(clientFd);
+        return;
+    }
 
     pollfd clientPoll;
     clientPoll.fd = clientFd;
@@ -81,7 +112,7 @@ void Server::removeClient(size_t i)
 }
 // stocker dans BUffer les data recu du client grace a recv puis
 // appeler methode de la class Client pour save toutes les donnees (le reste de limplementation se fera dans Client)
-void Server::handlePollEvent(size_t i)
+void Server::handleReadEvent(size_t i)
 {
     int fd = _pfds[i].fd;
     Client* client = _clients[fd];
@@ -97,12 +128,50 @@ void Server::handlePollEvent(size_t i)
 
     client->appendToInputBuffer(buffer, bytes);
 
-    while (client->hasCompleteLine())
+    if (client->hasCompleteLine())
     {
         std::string line = client->extractLine();
         std::cout << line << "\n";
-        processInput(client, line);
-        // handleLine(fd, line);
+        // inputProcess(fd, line);
     }
 }
 
+void Server::handleWriteEvent(size_t i)
+{
+    // 1. récupérer le fd et le client
+    // 2. vérifier s’il y a quelque chose à envoyer
+    // 3. appeler send()
+    // 4. en fontion de ce que return send, supprimer POLL OUTou continuer de conserver les donnees etc
+
+   
+    //     int fd = _pfds[i].fd;
+    //     Client* client = _clients[fd];
+
+    //     std::string& out = client->getOutputBuffer();
+
+    //     if (out.empty())
+    //     {
+    //         _pfds[i].events &= ~POLLOUT;
+    //         return;
+    //     }
+
+    //     ssize_t bytesSent = send(fd, out.c_str(), out.size(), 0);
+
+    //     if (bytesSent > 0)
+    //     {
+    //         out.erase(0, bytesSent);
+
+    //         if (out.empty())
+    //             _pfds[i].events &= ~POLLOUT;
+
+    //         return;
+    //     }
+
+    //     if (bytesSent < 0)
+    //     {
+    //         if (errno == EAGAIN || errno == EWOULDBLOCK)
+    //             return;
+
+    //         removeClient(i);
+    //     }
+}
