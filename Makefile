@@ -7,6 +7,7 @@ SRCFILES = Clients/Client.cpp \
 			Servers/irc.cpp \
 			Servers/reseau.cpp \
 			Servers/Server.cpp \
+			Servers/set.cpp \
 			Channel.cpp \
 			Utils.cpp \
 			main.cpp
@@ -15,27 +16,30 @@ HEADERS = Server.hpp \
 			Channel.hpp \
 			Client.hpp
 
-OBJFILES = $(SRCFILES:.cpp=.o)
+OBJDIR = obj
+
+OBJFILES = $(SRCFILES:%.cpp=$(OBJDIR)/%.o)
 
 CFLAGS = -Wall -Wextra -Werror -g3 -std=c++98
 
 CC = c++
 
-RM = rm -f
-
-$(NAME): $(OBJFILES)
-			$(CC) $(CFLAGS) -o $(NAME) $(OBJFILES)
-
-%.o: %.cpp $(HEADERS)
-	$(CC) $(CFLAGS) -c $< -o $@
+RM = rm -rf
 
 all: $(NAME)
 
+$(NAME): $(OBJFILES)
+	$(CC) $(CFLAGS) -o $(NAME) $(OBJFILES)
+
+$(OBJDIR)/%.o: %.cpp $(HEADERS)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 clean:
-			$(RM) $(OBJFILES)
+	$(RM) $(OBJDIR)
 
 fclean: clean
-			$(RM) $(NAME)
+	$(RM) $(NAME)
 
 re: fclean all
 
