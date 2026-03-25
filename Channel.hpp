@@ -30,8 +30,6 @@ class Channel
 
 		void	pushClientToMembers(Client* client);
 		void	kickClient(Client* client);
-		void	broadcastMsg(Client* sender, const std::string& msg);
-		void	broadcastMsgStrict(Client* sender, const std::string& msg, std::set<int>& alreadySent);
 		bool	isClientInChannel(int fd) const;
 
 		bool	isOperator(int fd) const;
@@ -51,6 +49,7 @@ class Channel
 		const std::string&	getTopic(void) const;
 		const std::string&	getTopicSetter(void) const;
 		time_t				getTopicTime(void) const;
+		std::map<int, Client*>& getMembers();
 
 		bool	hasMode(char mode);
 

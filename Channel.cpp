@@ -23,34 +23,6 @@ void Channel::kickClient(Client *client)
 	_members.erase(client->getFd());
 }
 
-/*
-A MODIFIER POUR AJOUTER LE MESSAGE DANS L'OUTPUT BUFFER */
-void	Channel::broadcastMsg(Client* sender, const std::string& msg)
-{
-	std::map<int, Client*>::iterator it;
-	for(it = _members.begin(); it != _members.end(); it++)
-	{
-		if (sender == NULL || it->second != sender)
-			send(it->first, msg.c_str(), msg.length(), 0);
-	}
-}
-
-void Channel::broadcastMsgStrict(Client* sender, const std::string& msg, std::set<int>& alreadySent)
-{
-	std::map<int, Client*>::iterator it;
-	for (it = _members.begin(); it != _members.end(); it++)
-	{
-		int targetFd = it->first;
-		if (sender != NULL && it->second == sender)
-			continue;
-		if (alreadySent.find(targetFd) == alreadySent.end())
-		{
-			send(targetFd, msg.c_str(), msg.length(), 0);
-			alreadySent.insert(targetFd);
-		}
-	}
-}
-
 bool Channel::isClientInChannel(int fd) const
 {
 	return (_members.find(fd) != _members.end());
@@ -133,4 +105,9 @@ void	Channel::incrementNumberMembers(void)
 void	Channel::decrementNumberMembers(void)
 {
 	this->_numberMembers--;
+}
+
+std::map<int, Client*>& Channel::getMembers()
+{
+	return _members;
 }

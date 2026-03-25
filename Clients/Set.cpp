@@ -77,3 +77,13 @@ bool Client::getHasUser(void) const
 {
 	return this->_hasUser;
 }
+
+std::string &Client::getInputBuffer()
+{
+    return _inputBuffer;
+}
+
+std::string& Client::getOutputBuffer()
+{
+    return _outputBuffer;
+}

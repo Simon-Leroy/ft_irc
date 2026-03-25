@@ -5,6 +5,11 @@ void Client::appendToInputBuffer(const char *data, int bytes)
     _inputBuffer.append(data, bytes);
 }
 
+void Client::appendToOutputBuffer(const std::string& data)
+{
+    _outputBuffer += data;
+}
+
 bool Client::hasCompleteLine() const
 {
     // return (_inputBuffer.find("\r\n") != std::string::npos);
@@ -23,14 +28,4 @@ std::string Client::extractLine()
     std::string line = _inputBuffer.substr(0, pos);
     _inputBuffer.erase(0, pos + 1);
     return line;
-}
-
-const std::string &Client::getInputBuffer() const
-{
-    return _inputBuffer;
-}
-
-const std::string &Client::getOutputBuffer() const
-{
-    return _outputBuffer;
 }

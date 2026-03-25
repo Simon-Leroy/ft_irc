@@ -60,10 +60,10 @@ void Server::run()
             if (_pfds.size() != oldSize)
                 continue;
 
-            // if (revents & POLLOUT)
-            // {
-            //     handleWriteEvent(i);
-            // }
+            if (revents & POLLOUT)
+            {
+                handleWriteEvent(i);
+            }
             i++;    
         }
     }
@@ -128,50 +128,90 @@ void Server::handleReadEvent(size_t i)
 
     client->appendToInputBuffer(buffer, bytes);
 
-    if (client->hasCompleteLine())
+    // if (client->hasCompleteLine())
+    while (client->hasCompleteLine())
     {
         std::string line = client->extractLine();
         std::cout << line << "\n";
-        // inputProcess(fd, line);
+        processInput(client, line);
     }
 }
 
-// void Server::handleWriteEvent(size_t i)
-// {
-//     // 1. récupérer le fd et le client
-//     // 2. vérifier s’il y a quelque chose à envoyer
-//     // 3. appeler send()
-//     // 4. en fontion de ce que return send, supprimer POLL OUTou continuer de conserver les donnees etc
+void Server::handleWriteEvent(size_t i)
+{
+    // 1. récupérer le fd et le client
+    // 2. vérifier s’il y a quelque chose à envoyer
+    // 3. appeler send()
+    // 4. en fontion de ce que return send, supprimer POLL OUTou continuer de conserver les donnees etc
 
-   
-//     //     int fd = _pfds[i].fd;
-//     //     Client* client = _clients[fd];
+    int fd = _pfds[i].fd;
+    Client* client = _clients[fd]; // Dangereux si fd n'existe pas 
 
-//     //     std::string& out = client->getOutputBuffer();
+    std::string& out = client->getOutputBuffer();
+    if (out.empty())
+    {
+        _pfds[i].events &= ~POLLOUT;
+        return;
+    }
 
-//     //     if (out.empty())
-//     //     {
-//     //         _pfds[i].events &= ~POLLOUT;
-//     //         return;
-//     //     }
+    ssize_t bytesSent = send(fd, out.c_str(), out.size(), 0);
+    if (bytesSent > 0)
+    {
+        out.erase(0, bytesSent);
+        if (out.empty())
+            _pfds[i].events &= ~POLLOUT;
+        return;
+    }
 
-//     //     ssize_t bytesSent = send(fd, out.c_str(), out.size(), 0);
+    if (bytesSent < 0)
+    {
+        if (errno == EAGAIN || errno == EWOULDBLOCK)
+            return;
+        removeClient(i);
+    }
+}
 
-//     //     if (bytesSent > 0)
-//     //     {
-//     //         out.erase(0, bytesSent);
+void Server::sendResponse(Client* client, const std::string& message)
+{
+	client->appendToOutputBuffer(message);
+	setPollOut(client);
+}
 
-//     //         if (out.empty())
-//     //             _pfds[i].events &= ~POLLOUT;
+void Server::sendNumeric(Client* client, std::string code, std::string message)
+{
+	std::string nick = client->getNickname();
+	if (nick.empty())
+		nick = "*";
 
-//     //         return;
-//     //     }
+	std::string finalMsg = ":" + this->_serverName + " " + code + " " + nick + " " + message + "\r\n";
+	sendResponse(client, finalMsg);
+}
 
-//     //     if (bytesSent < 0)
-//     //     {
-//     //         if (errno == EAGAIN || errno == EWOULDBLOCK)
-//     //             return;
+void Server::broadtoChannel(Channel *chan,Client* sender, const std::string& msg)
+{
+	std::map<int, Client*>& members = chan->getMembers();
 
-//     //         removeClient(i);
-//     //     }
-// }
+	for (std::map<int, Client*>::iterator it = members.begin(); it != members.end(); ++it)
+	{
+		if (sender == NULL || it->second != sender)
+			sendResponse(it->second, msg);
+	}
+}
+
+void Server::broadStrict_toChannel(Channel* chan, Client* sender, const std::string& msg, std::set<int>& alreadySent)
+{
+	std::map<int, Client*>& members = chan->getMembers();
+
+	for (std::map<int, Client*>::iterator it = members.begin(); it != members.end(); ++it)
+	{
+		int targetFd = it->first;
+
+		if (sender != NULL && it->second == sender)
+			continue;
+		if (alreadySent.find(targetFd) == alreadySent.end())
+		{
+			sendResponse(it->second, msg);
+			alreadySent.insert(targetFd);
+		}
+	}
+}

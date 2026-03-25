@@ -14,7 +14,8 @@ SRCFILES = Clients/Client.cpp \
 
 HEADERS = Server.hpp \
 			Channel.hpp \
-			Client.hpp
+			Client.hpp \
+			Numerics.hpp
 
 OBJDIR = obj
 

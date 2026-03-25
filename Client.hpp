@@ -29,12 +29,12 @@ class Client
         ~Client();
 
         void appendToInputBuffer(const char *data, int bytes);
+        void appendToOutputBuffer(const std::string& data);    
         bool hasCompleteLine() const;
         std::string extractLine();
 
-        const std::string &getInputBuffer() const;
-        const std::string &getOutputBuffer() const;
-
+        std::string &getInputBuffer();
+        std::string &getOutputBuffer();
 
             // Getters and setters
                 std::string	getNickname(void) const;

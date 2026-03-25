@@ -3,20 +3,6 @@
 #include "../Channel.hpp"
 #include "../Numerics.hpp"
 
-void	Server::sendResponse(Client *client, const std::string& message)
-{
-	send(client->getFd(), message.c_str(), message.length(), 0);
-}
-
-void	Server::sendNumeric(Client* client, std::string code, std::string message)
-{
-	std::string nick = client->getNickname();
-	if (nick.empty())
-		nick = "*";
-	std::string finalMsg = ":" + this->_serverName + " " + code + " " + nick + " " + message + "\r\n";
-	send(client->getFd(), finalMsg.c_str(), finalMsg.length(), 0);
-}
-
 void Server::registerClient(Client* client)
 {
 	client->setIsRegistered(true);
@@ -40,6 +26,8 @@ void	Server::execCap(Client* client, const std::vector<std::string>& args)
 
 void	Server::execPass(Client* client, const std::vector<std::string>& args)
 {
+	std::cout << "PASS recu = [" << args[1] << "]" << std::endl;
+	std::cout << "PASS attendu = [" << this->_password << "]" << std::endl;
 	if (args.size() < 2)
 	{
 		sendNumeric(client, ERR_NEEDMOREPARAMS, "PASS :Not enough parameters");
@@ -140,7 +128,8 @@ void	Server::execPrivmsg(Client* client, const std::vector<std::string>& args)
 			return ;
 		}
 		std::string msg = senderPrefix + " PRIVMSG " + target + " :" + text + "\r\n";
-		chan->broadcastMsg(client, msg);
+		// chan->broadcastMsg(client, msg);
+		broadtoChannel(chan, client, msg);
 	}
 	else
 	{
@@ -198,7 +187,8 @@ void Server::execJoin(Client* client, const std::vector<std::string>& args)
 
 	std::string msg = ":" + client->getNickname() + "!" + client->getUsername()
 					+ "@" + _serverName + " JOIN " + chanName + "\r\n";
-	chan->broadcastMsg(NULL, msg);
+	// chan->broadcastMsg(NULL, msg);
+	broadtoChannel(chan, NULL, msg);
 	if (!chan->getTopic().empty())
 	{
 		sendNumeric(client, RPL_TOPIC, chanName + " :" + chan->getTopic());
@@ -268,7 +258,8 @@ void	Server::execKick(Client* client, const std::vector<std::string>& args)
 	else
 		reason = "Kicked by operator";
 	std::string msg = ":" + client->getNickname() + " KICK " + chanName + " " + targetNick + " :" + reason + "\r\n";
-	chan->broadcastMsg(NULL, msg);
+	// chan->broadcastMsg(NULL, msg);
+	broadtoChannel(chan, NULL, msg);
 	chan->kickClient(toKick);
 	toKick->removeChannel(chan);
 	chan->decrementNumberMembers();
@@ -314,7 +305,8 @@ void Server::execTopic(Client* client, const std::vector<std::string>& args)
 		std::string notif = ":" + client->getNickname() + "!" + client->getUsername()
 							+ "@" + this->_serverName + " TOPIC " + chanName
 							+ " :" + newTopic + "\r\n";
-		chan->broadcastMsg(NULL, notif);
+		// chan->broadcastMsg(NULL, notif);
+		broadtoChannel(chan, NULL, notif);
 	}
 	else // READ TOPIC ONLY (pas besoin d'être opérateur)
 	{
@@ -470,6 +462,6 @@ void Server::notifyAllChans(Client* client, const std::string& msg)
 	alreadySent.insert(client->getFd());
 	for (std::set<Channel*>::const_iterator it = joinedChans.begin(); it != joinedChans.end(); ++it)
 	{
-		(*it)->broadcastMsgStrict(client, msg, alreadySent);
+		broadStrict_toChannel(*it, client, msg, alreadySent);
 	}
 }

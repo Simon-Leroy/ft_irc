@@ -16,6 +16,7 @@
 #include <cstring>        // memset (optionnel)
 #include <cstdlib>        // NULL
 #include <map>
+#include <cerrno>
 
 #include <fcntl.h>
 
@@ -25,7 +26,6 @@ private:
     int _serverFd;
     int _port;
     std::vector<pollfd> _pfds; // stock tous les fd et permet a ft poll de checker
-    // std::map<int, Client> _clients;
 
     	typedef void (Server::*cmd_ptr)(Client* client, const std::vector<std::string>& args);
 		std::map<std::string, cmd_ptr>	_commands;
@@ -44,41 +44,41 @@ public:
     void removeClient(size_t i);
     void handleReadEvent(size_t i);
     void handleWriteEvent(size_t i);
-	
+	void sendResponse(Client* client, const std::string& message);
+	void sendNumeric(Client* client, std::string code, std::string message);
+	void broadtoChannel(Channel *chan,Client* sender, const std::string& msg);
+	void broadStrict_toChannel(Channel *chan, Client* sender, const std::string& msg, std::set<int>& alreadySent);
+
 	void setPollOut(Client* client);
 
-    //penser a une fonction permettant de ne pas bloquer le fd serveur/client (ca evite de bloquer le flux pcq en att de msg sur 1 fd specifique)
-
-        // Member functions
-		void	initCommands(void);
-		void	processInput(Client* client, std::string input);
-		void	sendResponse(Client* client, const std::string& message);
-		void	sendNumeric(Client* client, std::string code, std::string message);
+    // Member functions
+	void	initCommands(void);
+	void	processInput(Client* client, std::string input);
 
 		// Check
-		bool	isNickUsed(const std::string& nick) const;
+	bool	isNickUsed(const std::string& nick) const;
 
 		// Channel
-		bool	channelExists(const std::string& channelName) const;
-		void	createChannel(Client* client, const std::string& channelName);
-		void	sendMsgToChannel(Client* sendingClient, const std::string& channelName, const std::string& msg);
-		void	notifyAllChans(Client* client, const std::string& msg);
+	bool	channelExists(const std::string& channelName) const;
+	void	createChannel(Client* client, const std::string& channelName);
+	void	sendMsgToChannel(Client* sendingClient, const std::string& channelName, const std::string& msg);
+	void	notifyAllChans(Client* client, const std::string& msg);
 
-		Client* findClientFromNick(const std::string& nick) const;
+	Client* findClientFromNick(const std::string& nick) const;
 
 		// Command functions
-		void	execJoin(Client* client, const std::vector<std::string>& args);
-		void	execKick(Client* client, const std::vector<std::string>& args);
-		void	execCap(Client* client, const std::vector<std::string>& args);
-		void	execNick(Client* client, const std::vector<std::string>& args);
-		void	execPass(Client* client, const std::vector<std::string>& args);
-		void	execUser(Client* client, const std::vector<std::string>& args);
-		void	execPrivmsg(Client* client, const std::vector<std::string>& args);
-		void	execPong(Client* client, const std::vector<std::string>& args);
-		void	execTopic(Client* client, const std::vector<std::string>& args);
-		void	execInvite(Client* client, const std::vector<std::string>& args);
+	void	execJoin(Client* client, const std::vector<std::string>& args);
+	void	execKick(Client* client, const std::vector<std::string>& args);
+	void	execCap(Client* client, const std::vector<std::string>& args);
+	void	execNick(Client* client, const std::vector<std::string>& args);
+	void	execPass(Client* client, const std::vector<std::string>& args);
+	void	execUser(Client* client, const std::vector<std::string>& args);
+	void	execPrivmsg(Client* client, const std::vector<std::string>& args);
+	void	execPong(Client* client, const std::vector<std::string>& args);
+	void	execTopic(Client* client, const std::vector<std::string>& args);
+	void	execInvite(Client* client, const std::vector<std::string>& args);
 
-		void	registerClient(Client* client);
+	void	registerClient(Client* client);
 };
 
 std::string	str_toupper(std::string str);
@@ -86,4 +86,3 @@ std::string	ft_trim(const std::string& str);
 std::vector<std::string> ft_split(const std::string& line);
 
 #endif
-
