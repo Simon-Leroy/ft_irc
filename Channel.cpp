@@ -1,5 +1,5 @@
-#include "Channel.hpp"
-#include "Client.hpp"
+#include "include/Channel.hpp"
+#include "include/Client.hpp"
 
 Channel::Channel(const std::string& channelName): _channelName(channelName)
 {

@@ -1,4 +1,4 @@
-#include "../Client.hpp"
+#include "../include/Client.hpp"
 
 void Client::appendToInputBuffer(const char *data, int bytes)
 {

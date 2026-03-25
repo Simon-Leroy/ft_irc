@@ -1,4 +1,4 @@
-#include "../Server.hpp"
+#include "../include/Server.hpp"
 
 Server::Server(int port) : _serverFd(-1), _port(port), _password("prov"), _serverName("localhost")
 {

@@ -1,7 +1,7 @@
-#include "../Server.hpp"
-#include "../Client.hpp"
-#include "../Channel.hpp"
-#include "../Numerics.hpp"
+#include "../include/Server.hpp"
+#include "../include/Client.hpp"
+#include "../include/Channel.hpp"
+#include "../include/Numerics.hpp"
 
 void Server::registerClient(Client* client)
 {

@@ -12,10 +12,10 @@ SRCFILES = Clients/Client.cpp \
 			Utils.cpp \
 			main.cpp
 
-HEADERS = Server.hpp \
-			Channel.hpp \
-			Client.hpp \
-			Numerics.hpp
+HEADERS = include/Server.hpp \
+			include/Channel.hpp \
+			include/Client.hpp \
+			include/Numerics.hpp
 
 OBJDIR = obj
 

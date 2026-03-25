@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "include/Server.hpp"
 
 /*
 Fonction pour mettre en majuscules une chaîne de caractères
