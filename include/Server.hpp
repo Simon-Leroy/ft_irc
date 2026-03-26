@@ -20,6 +20,9 @@
 
 #include <fcntl.h>
 
+class Client;
+class Channel;
+
 class Server
 {
 private:
@@ -63,8 +66,14 @@ public:
 	void	createChannel(Client* client, const std::string& channelName);
 	void	sendMsgToChannel(Client* sendingClient, const std::string& channelName, const std::string& msg);
 	void	notifyAllChans(Client* client, const std::string& msg);
+		void	deleteChannel(std::string chanName); // NEW
+		bool	canJoinChannel(Client* client, Channel* chan, const std::vector<std::string>& args); // NEW
+
 
 	Client* findClientFromNick(const std::string& nick) const;
+
+		Channel* getValidChannel(Client* client, const std::vector<std::string>& args,
+								size_t min_args, size_t chanIndex, const std::string& cmd); // NEW
 
 		// Command functions
 	void	execJoin(Client* client, const std::vector<std::string>& args);
@@ -77,12 +86,19 @@ public:
 	void	execPong(Client* client, const std::vector<std::string>& args);
 	void	execTopic(Client* client, const std::vector<std::string>& args);
 	void	execInvite(Client* client, const std::vector<std::string>& args);
+		void	execPart(Client* client, const std::vector<std::string>& args); // NEW
+		void	execMode(Client* client, const std::vector<std::string>& args); // NEW
 
 	void	registerClient(Client* client);
+		void	sendNamesList(Client* client, Channel* chan); // NEW
 };
 
 std::string	str_toupper(std::string str);
 std::string	ft_trim(const std::string& str);
 std::vector<std::string> ft_split(const std::string& line);
+
+	std::string size_t_to_string(size_t n); // NEW
+	size_t string_to_size_t(const std::string& str); // NEW
+	bool isValidChanName(const std::string& name); // NEW
 
 #endif

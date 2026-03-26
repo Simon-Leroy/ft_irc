@@ -282,3 +282,16 @@ void Server::broadStrict_toChannel(Channel* chan, Client* sender, const std::str
 		alreadySent.insert(targetFd);
 	}
 }
+
+void Server::notifyAllChans(Client* client, const std::string& msg)
+{
+	std::set<int> alreadySent;
+	const std::set<Channel*>& joinedChans = client->getChannels();
+
+	sendResponse(client, msg);
+	alreadySent.insert(client->getFd());
+	for (std::set<Channel*>::const_iterator it = joinedChans.begin(); it != joinedChans.end(); ++it)
+	{
+		broadStrict_toChannel(*it, client, msg, alreadySent);
+	}
+}

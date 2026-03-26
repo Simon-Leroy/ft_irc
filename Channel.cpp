@@ -6,7 +6,8 @@ Channel::Channel(const std::string& channelName)
       _topic(""),
       _topicSetter(""),
       _topicTime(0),
-      _limitMembers(0)
+      _limitMembers(0),
+	  _key("")
 {
     _modes['t'] = true;
     _modes['i'] = false;
@@ -99,22 +100,37 @@ size_t	Channel::getNumberMembers(void) const
 	return _members.size();
 }
 
+void	Channel::setLimitMembers(size_t limit)
+{
+	this->_limitMembers = limit;
+}
+
+const std::set<int>& Channel::getMembers() const
+{
+	return _members;
+}
+
+const std::string&	Channel::getChannelName(void) const
+{
+	return this->_channelName;
+}
+
 size_t	Channel::getLimitMembers(void) const
 {
 	return this->_limitMembers;
 }
 
-// void	Channel::incrementNumberMembers(void)
-// {
-// 	this->_numberMembers++;
-// }
-
-// void	Channel::decrementNumberMembers(void)
-// {
-// 	this->_numberMembers--;
-// }
-
-const std::set<int>& Channel::getMembers() const
+const std::string& Channel::getKey(void) const
 {
-	return _members;
+	return this->_key;
+}
+
+void Channel::setMode(char mode, bool active)
+{
+	_modes[mode] = active;
+}
+
+void Channel::setKey(std::string key)
+{
+	this->_key = key;
 }

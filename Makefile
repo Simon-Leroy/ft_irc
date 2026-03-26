@@ -4,13 +4,28 @@ SRCFILES = Clients/Client.cpp \
 			Clients/reseau.cpp \
 			Clients/Set.cpp \
 			Clients/irc.cpp \
-			Servers/irc.cpp \
+			Commands/capCmd.cpp \
+			Commands/initAllCommands.cpp \
+			Commands/inviteCmd.cpp \
+			Commands/joinCmd.cpp \
+			Commands/kickCmd.cpp \
+			Commands/modeCmd.cpp \
+			Commands/nickCmd.cpp \
+			Commands/partCmd.cpp \
+			Commands/passCmd.cpp \
+			Commands/pingCmd.cpp \
+			Commands/privmsgCmd.cpp \
+			Commands/topicCmd.cpp \
+			Commands/userCmd.cpp \
 			Servers/reseau.cpp \
 			Servers/Server.cpp \
+			Servers/ServerChanMgmt.cpp \
+			Servers/ServerUtils.cpp \
 			Servers/set.cpp \
 			Channel.cpp \
 			Utils.cpp \
 			main.cpp
+# 			Servers/irc.cpp \
 
 HEADERS = include/Server.hpp \
 			include/Channel.hpp \

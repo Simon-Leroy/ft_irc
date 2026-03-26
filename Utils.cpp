@@ -91,3 +91,18 @@ std::string getReadableTime(time_t rawtime)
 	std::strftime(buffer, 80, "%d/%m/%Y %H:%M:%S", timeinfo);
 	return std::string(buffer);
 }
+
+std::string size_t_to_string(size_t n)
+{
+	std::stringstream ss;
+	ss << n;
+	return ss.str();
+}
+
+size_t string_to_size_t(const std::string& str)
+{
+	std::stringstream ss(str);
+	size_t result;
+	ss >> result;
+	return result;
+}

@@ -24,6 +24,7 @@ class Channel
 		time_t					_topicTime;
 		// size_t					_numberMembers;
 		size_t					_limitMembers;
+		std::string				_key;
 
 	public:
 		Channel(const std::string& channelName);
@@ -36,6 +37,7 @@ class Channel
 		bool	isOperator(int fd) const;
 		void	addOperator(int fd);
 		void	removeOperator(int fd);
+		void	setLimitMembers(size_t	limit);
 
 		void	addToInviteList(std::string nickname); //
 		void	removeFromInviteList(std::string nickname); //
@@ -52,10 +54,17 @@ class Channel
 		const std::string&	getTopicSetter(void) const;
 		time_t				getTopicTime(void) const;
 		// std::map<int, Client*>& getMembers();
+		
+			const std::string&				getChannelName(void) const;
+			// size_t							getNumberMembers(void) const;
+			// size_t							getLimitMembers(void) const;
+			const std::string&				getKey(void) const;
+			void							setMode(char mode, bool state); //
+			void							setKey(std::string key); //
+
 
 		bool	hasMode(char mode);
-
-
+		std::string 					activeModesToStr(void);
 };
 
 std::string	getReadableTime(time_t rawtime);
