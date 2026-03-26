@@ -20,6 +20,8 @@
 
 #include <fcntl.h>
 
+#include <csignal>
+
 class Client;
 class Channel;
 
