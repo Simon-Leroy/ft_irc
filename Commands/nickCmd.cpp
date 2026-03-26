@@ -24,7 +24,7 @@ void	Server::execNick(Client* client, const std::vector<std::string>& args)
 	if (client->getIsRegistered())
 	{
 		std::string msg = ":" + client->getNickname() + "!" + client->getUsername() + "@"
-						+ "127.0.0.1" + " NICK " + newNick + "\r\n";
+						+ this->_serverName + " NICK " + newNick + "\r\n";
 		client->setNickname(newNick);
 		notifyAllChans(client, msg);
 		return ;

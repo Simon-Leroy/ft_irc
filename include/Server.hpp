@@ -40,7 +40,7 @@ private:
 		std::string						_serverName;
 
 public:
-    Server(int port);
+    Server(int port, std::string pass);
     ~Server();
 
     void initSocket();

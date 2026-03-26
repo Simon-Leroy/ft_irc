@@ -1,6 +1,6 @@
 #include "../include/Server.hpp"
 
-Server::Server(int port) : _serverFd(-1), _port(port), _password("prov"), _serverName("localhost")
+Server::Server(int port, std::string pass) : _serverFd(-1), _port(port), _password(pass), _serverName("localhost")
 {
     // std::cout << "Password is '" << this->_password << "'" << std::endl;
     initCommands();

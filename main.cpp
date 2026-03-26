@@ -12,15 +12,18 @@ void signalHandler(int signum) {
 
 int main(int ac, char **av)
 {
-    if (ac != 2)
+    if (ac != 3)
+    {
+        std::cerr << "Port and password of server are needed" << std::endl;
         return 1;
+    }
 
     std::signal(SIGINT, signalHandler);
     std::signal(SIGQUIT, signalHandler);
     int port = std::atoi(av[1]);
     try
     {
-        Server server(port);
+        Server server(port, av[2]);
         server.initSocket();
         while (g_running)
             server.run();
