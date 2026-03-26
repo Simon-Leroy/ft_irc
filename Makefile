@@ -17,6 +17,7 @@ SRCFILES = Clients/Client.cpp \
 			Commands/privmsgCmd.cpp \
 			Commands/topicCmd.cpp \
 			Commands/userCmd.cpp \
+			Commands/quitCmd.cpp \
 			Servers/reseau.cpp \
 			Servers/Server.cpp \
 			Servers/ServerChanMgmt.cpp \

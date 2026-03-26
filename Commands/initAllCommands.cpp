@@ -21,4 +21,5 @@ void	Server::initCommands(void)
 	_commands["INVITE"] = &Server::execInvite;
 	_commands["PART"] = &Server::execPart;
 	_commands["MODE"] = &Server::execMode;
+	_commands["QUIT"] = &Server::execQuit;
 }

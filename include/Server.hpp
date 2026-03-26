@@ -90,6 +90,7 @@ public:
 	void	execInvite(Client* client, const std::vector<std::string>& args);
 		void	execPart(Client* client, const std::vector<std::string>& args); // NEW
 		void	execMode(Client* client, const std::vector<std::string>& args); // NEW
+		void	execQuit(Client* client, const std::vector<std::string>& args); // NEW
 
 	void	registerClient(Client* client);
 		void	sendNamesList(Client* client, Channel* chan); // NEW
