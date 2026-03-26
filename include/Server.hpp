@@ -1,7 +1,7 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include <iostream>
+#include <iostream> // USER <username> 0 * :<realname>
 #include <vector>
 #include "Client.hpp"
 #include "Channel.hpp"
