@@ -83,6 +83,8 @@ void	Server::execMode(Client* client, const std::vector<std::string>& args)
 	std::string appliedArgs = "";
 	size_t argPos = 3;
 	bool adding = true;
+	char lastAppliedDir = 0;
+	char currentDir = 0;
 
 	for (size_t i = 0; i < flags.length(); i++)
 	{
@@ -90,13 +92,11 @@ void	Server::execMode(Client* client, const std::vector<std::string>& args)
 		if (c == '+')
 		{
 			adding = true;
-			appliedModes += "+";
 			continue ;
 		}
 		if (c == '-')
 		{
 			adding = false;
-			appliedModes += "-";
 			continue ;
 		}
 		if (validModes.find(c) == std::string::npos)
@@ -106,44 +106,49 @@ void	Server::execMode(Client* client, const std::vector<std::string>& args)
 		}
 
 		// MODES
+		std::string currentArg = "";
+		bool modeChanged = false;
 		if (c == 'i' || c == 't')
 		{
-			chan->setMode(c, adding);
-			appliedModes += c;
+			if (chan->hasMode(c) != adding)
+			{
+				chan->setMode(c, adding);
+				modeChanged = true;
+			}
 		}
 		else if (c == 'k')
 		{
 			if (adding && argPos < args.size())
 			{
-				std::string key = args[argPos++];
-				chan->setKey(key);
+				currentArg = args[argPos++];
+				chan->setKey(currentArg);
 				chan->setMode('k', true);
-				appliedModes += 'k';
-				appliedArgs += " " + key;
+				modeChanged = true;
 			}
 			else if (!adding)
 			{
 				chan->setMode('k', false);
-				appliedModes += 'k';
+				modeChanged = true;
 			}
 		}
 		else if (c == 'l')
 		{
 			if (adding && argPos < args.size())
 			{
-				int limit = std::atoi(args[argPos++].c_str());
+				std::string arg = args[argPos++];
+				int limit = std::atoi(arg.c_str());
 				if (limit > 0)
 				{
 					chan->setLimitMembers(limit);
 					chan->setMode('l', true);
-					appliedModes += 'l';
-					appliedArgs += " " + size_t_to_string(limit);
+					currentArg = size_t_to_string(limit);
+					modeChanged = true;
 				}
 			}
 			else if (!adding)
 			{
 				chan->setMode('l', false);
-				appliedModes += 'l';
+				modeChanged = true;
 			}
 		}
 		else if (c == 'o')
@@ -158,12 +163,27 @@ void	Server::execMode(Client* client, const std::vector<std::string>& args)
 						chan->addOperator(target->getFd());
 					else
 						chan->removeOperator(target->getFd());
-					appliedModes += 'o';
-					appliedArgs += " " + targetNick;
+					currentArg = targetNick;
+					modeChanged = true;
 				}
 				else
 					sendNumeric(client, ERR_NOSUCHNICK, targetNick + " :No such nick");
 			}
+		}
+		if (modeChanged)
+		{
+			if (adding)
+				currentDir = '+';
+			else
+				currentDir = '-';
+			if (currentDir != lastAppliedDir)
+			{
+				appliedModes += currentDir;
+				lastAppliedDir = currentDir;
+			}
+			appliedModes += c;
+			if (!currentArg.empty())
+				appliedArgs += " " + currentArg;
 		}
 	}
 	if (appliedModes != "+" && appliedModes != "-")
