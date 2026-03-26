@@ -20,6 +20,12 @@ void	Server::processInput(Client* client, std::string input)
 		std::cerr << "Missing input" << std::endl;
 		return;
 	}
+
+	if(!client->getIsRegistered())
+		std::cout << BLUE << "Client fd  " << client->getFd() << " -> " << input << RESET << std::endl;
+	else 
+		std::cout << input << std::endl;
+
 	std::string trimmed_input = ft_trim(input);
 	std::vector<std::string> tokens = ft_split(trimmed_input);
 	if (tokens.empty())
@@ -34,8 +40,11 @@ void	Server::processInput(Client* client, std::string input)
 		sendNumeric(client, ERR_NOTREGISTERED, ":Not registered");
 		return ;
 	}
+	// si meme timestamp que affichage nouveau client alors afficher en bleu sinon en Blanc
 	if (_commands.count(cmdName))
+	{
 		(this->*_commands[cmdName])(client, tokens);
+	}
 	else
 		std::cerr << "Unknown command" << std::endl;
 }

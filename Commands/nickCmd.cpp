@@ -31,4 +31,6 @@ void	Server::execNick(Client* client, const std::vector<std::string>& args)
 	}
 	client->setNickname(newNick);
 	client->setHasNickname(true);
+	if (client->getHasPass() && client->getHasNickname() && client->getHasUser())
+		registerClient(client);
 }

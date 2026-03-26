@@ -210,35 +210,6 @@ void Server::sendNumeric(Client* client, std::string code, std::string message)
 	sendResponse(client, finalMsg);
 }
 
-// void Server::broadtoChannel(Channel *chan,Client* sender, const std::string& msg)
-// {
-// 	std::map<int, Client*>& members = chan->getMembers();
-
-// 	for (std::map<int, Client*>::iterator it = members.begin(); it != members.end(); ++it)
-// 	{
-// 		if (sender == NULL || it->second != sender)
-// 			sendResponse(it->second, msg);
-// 	}
-// }
-
-// void Server::broadStrict_toChannel(Channel* chan, Client* sender, const std::string& msg, std::set<int>& alreadySent)
-// {
-// 	// std::map<int, Client*>& members = chan->getMembers();
-//     std::set<int> &members = chan->getMembers();
-
-// 	for (std::map<int, Client*>::iterator it = members.begin(); it != members.end(); ++it)
-// 	{
-// 		int targetFd = it->first;
-
-// 		if (sender != NULL && it->second == sender)
-// 			continue;
-// 		if (alreadySent.find(targetFd) == alreadySent.end())
-// 		{
-// 			sendResponse(it->second, msg);
-// 			alreadySent.insert(targetFd);
-// 		}
-// 	}
-// }
 
 void Server::broadtoChannel(Channel *chan, Client* sender, const std::string& msg)
 {

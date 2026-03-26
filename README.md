@@ -40,5 +40,3 @@ handleLine(fd, line)
 -> send() les données
 13. si recv == 0 ou erreur
 -> déconnecter le client
-
-  
