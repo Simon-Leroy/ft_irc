@@ -2,7 +2,7 @@
 
 Server::Server(int port) : _serverFd(-1), _port(port), _password("prov"), _serverName("localhost")
 {
-    std::cout << "Password is '" << this->_password << "'" << std::endl;
+    // std::cout << "Password is '" << this->_password << "'" << std::endl;
     initCommands();
 }
 

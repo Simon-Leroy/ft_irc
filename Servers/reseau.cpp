@@ -31,13 +31,12 @@ void Server::run()
 
     _pfds.push_back(serverPoll);
 
-    // boucle infini pour ajouter les nouveaux clients
     while (true)
     {
-        if (poll(_pfds.data(), _pfds.size(), -1) < 0) // -1 -> poll dort tant que aucun event 
+        if (poll(_pfds.data(), _pfds.size(), -1) < 0)
             throw std::runtime_error("poll failed");
 
-        if (_pfds[0].revents & POLLIN) // verif qu'un flag POLLIN (demande de connexion) est bien present dans le revents de la socket serveur
+        if (_pfds[0].revents & POLLIN)
             acceptNewClient();
 
         // gestion de l'index manuel car removeClient replace la place de lelement supprime par un autre
@@ -56,7 +55,7 @@ void Server::run()
             {
                 handleReadEvent(i);
             }
-            //car handleReadEvent peutfaire un reove clienet donc modif lelemnt a lindex
+            //car handleReadEvent peutfaire un remove clienet donc modif lelemnt a lindex
             if (_pfds.size() != oldSize)
                 continue;
 
@@ -75,8 +74,7 @@ void Server::acceptNewClient()
     if (clientFd < 0)
         return; // Ajout gestion de l'erreur
 
-    // init tous les attributs a 0 + ajouter client a la map
-    std::cout << "Nouveau client connecté, fd = " << clientFd << std::endl;
+    std::cout << "------------------------------------\n" << "| Nouveau client connecté | fd = " << clientFd <<  " |\n------------------------------------" << std::endl;
 
     int flags = fcntl(clientFd, F_GETFL);
     if (flags == -1)
@@ -110,7 +108,7 @@ void Server::removeClient(size_t i)
         return;
     }
 
-    std::cout << "Client déconnecté, fd = " << fd << std::endl;
+    std::cout << "------------------------------\n" << "| Client déconnecté | fd = " << fd <<  " |\n------------------------------" << std::endl;
 
     for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); )
     {
@@ -157,7 +155,7 @@ void Server::handleReadEvent(size_t i)
     while (client->hasCompleteLine())
     {
         std::string line = client->extractLine();
-        std::cout << line << "\n";
+        // std::cout << line << "\n";
         processInput(client, line);
     }
 }
