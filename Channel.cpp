@@ -1,11 +1,16 @@
 #include "include/Channel.hpp"
 #include "include/Client.hpp"
 
-Channel::Channel(const std::string& channelName): _channelName(channelName)
+Channel::Channel(const std::string& channelName)
+    : _channelName(channelName),
+      _topic(""),
+      _topicSetter(""),
+      _topicTime(0),
+      _limitMembers(0)
 {
-	this->_modes['t'] = true;
-	this->_modes['i'] = false;
-	this->_modes['k'] = false;
+    _modes['t'] = true;
+    _modes['i'] = false;
+    _modes['k'] = false;
 }
 
 Channel::~Channel()
@@ -13,14 +18,15 @@ Channel::~Channel()
 
 }
 
-void Channel::pushClientToMembers(Client* client)
+void Channel::pushClientToMembers(int fd)
 {
-	_members[client->getFd()] = client;
+	_members.insert(fd);
 }
 
-void Channel::kickClient(Client *client)
+void Channel::kickClient(int fd)
 {
-	_members.erase(client->getFd());
+    _members.erase(fd);
+    _operatorsFd.erase(fd);
 }
 
 bool Channel::isClientInChannel(int fd) const
@@ -90,7 +96,7 @@ bool Channel::isClientInList(std::string nickname)
 
 size_t	Channel::getNumberMembers(void) const
 {
-	return this->_numberMembers;
+	return _members.size();
 }
 
 size_t	Channel::getLimitMembers(void) const
@@ -98,16 +104,17 @@ size_t	Channel::getLimitMembers(void) const
 	return this->_limitMembers;
 }
 
-void	Channel::incrementNumberMembers(void)
-{
-	this->_numberMembers++;
-}
-void	Channel::decrementNumberMembers(void)
-{
-	this->_numberMembers--;
-}
+// void	Channel::incrementNumberMembers(void)
+// {
+// 	this->_numberMembers++;
+// }
 
-std::map<int, Client*>& Channel::getMembers()
+// void	Channel::decrementNumberMembers(void)
+// {
+// 	this->_numberMembers--;
+// }
+
+const std::set<int>& Channel::getMembers() const
 {
 	return _members;
 }

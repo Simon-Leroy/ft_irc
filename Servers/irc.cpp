@@ -180,10 +180,10 @@ void Server::execJoin(Client* client, const std::vector<std::string>& args)
 		sendNumeric(client, ERR_CHANNELISFULL, chanName + " :Cannot join channel (+l)");
 		return ;
 	}
-	chan->pushClientToMembers(client);
+	chan->pushClientToMembers(client->getFd());
 	chan->removeFromInviteList(client->getNickname());
 	client->addChannel(chan);
-	chan->incrementNumberMembers();
+	// chan->incrementNumberMembers();
 
 	std::string msg = ":" + client->getNickname() + "!" + client->getUsername()
 					+ "@" + _serverName + " JOIN " + chanName + "\r\n";
@@ -203,7 +203,7 @@ void Server::execJoin(Client* client, const std::vector<std::string>& args)
 void	Server::createChannel(Client* client, const std::string& channelName)
 {
 	Channel* chan = new Channel(channelName);
-	chan->pushClientToMembers(client);
+	chan->pushClientToMembers(client->getFd());
 	chan->addOperator(client->getFd());
 	client->addChannel(chan);
 	_channels[channelName] = chan;
@@ -260,9 +260,9 @@ void	Server::execKick(Client* client, const std::vector<std::string>& args)
 	std::string msg = ":" + client->getNickname() + " KICK " + chanName + " " + targetNick + " :" + reason + "\r\n";
 	// chan->broadcastMsg(NULL, msg);
 	broadtoChannel(chan, NULL, msg);
-	chan->kickClient(toKick);
+	chan->kickClient(toKick->getFd());
 	toKick->removeChannel(chan);
-	chan->decrementNumberMembers();
+	// chan->decrementNumberMembers();
 }
 
 void Server::execPong(Client* client, const std::vector<std::string>& args)

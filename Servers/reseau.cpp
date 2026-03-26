@@ -102,14 +102,39 @@ void Server::acceptNewClient()
 void Server::removeClient(size_t i)
 {
     int fd = _pfds[i].fd;
+    std::map<int, Client*>::iterator itClient = _clients.find(fd);
+
+    if (itClient == _clients.end())
+    {
+        _pfds.erase(_pfds.begin() + i);
+        return;
+    }
 
     std::cout << "Client déconnecté, fd = " << fd << std::endl;
 
-    close(fd);                 // ferme la socket
-    delete _clients[fd];
-    _clients.erase(fd);        // supprime de la map
-    _pfds.erase(_pfds.begin() + i); // retire de poll
+    for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); )
+    {
+        Channel* chan = it->second;
+
+        if (chan->isClientInChannel(fd))
+            chan->kickClient(fd);
+
+        if (chan->getMembers().empty())
+        {
+            delete chan;
+            std::map<std::string, Channel*>::iterator toErase = it++;
+            _channels.erase(toErase);
+            continue;
+        }
+        ++it;
+    }
+
+    close(fd);
+    delete itClient->second;
+    _clients.erase(itClient);
+    _pfds.erase(_pfds.begin() + i);
 }
+
 // stocker dans BUffer les data recu du client grace a recv puis
 // appeler methode de la class Client pour save toutes les donnees (le reste de limplementation se fera dans Client)
 void Server::handleReadEvent(size_t i)
@@ -187,31 +212,73 @@ void Server::sendNumeric(Client* client, std::string code, std::string message)
 	sendResponse(client, finalMsg);
 }
 
-void Server::broadtoChannel(Channel *chan,Client* sender, const std::string& msg)
-{
-	std::map<int, Client*>& members = chan->getMembers();
+// void Server::broadtoChannel(Channel *chan,Client* sender, const std::string& msg)
+// {
+// 	std::map<int, Client*>& members = chan->getMembers();
 
-	for (std::map<int, Client*>::iterator it = members.begin(); it != members.end(); ++it)
+// 	for (std::map<int, Client*>::iterator it = members.begin(); it != members.end(); ++it)
+// 	{
+// 		if (sender == NULL || it->second != sender)
+// 			sendResponse(it->second, msg);
+// 	}
+// }
+
+// void Server::broadStrict_toChannel(Channel* chan, Client* sender, const std::string& msg, std::set<int>& alreadySent)
+// {
+// 	// std::map<int, Client*>& members = chan->getMembers();
+//     std::set<int> &members = chan->getMembers();
+
+// 	for (std::map<int, Client*>::iterator it = members.begin(); it != members.end(); ++it)
+// 	{
+// 		int targetFd = it->first;
+
+// 		if (sender != NULL && it->second == sender)
+// 			continue;
+// 		if (alreadySent.find(targetFd) == alreadySent.end())
+// 		{
+// 			sendResponse(it->second, msg);
+// 			alreadySent.insert(targetFd);
+// 		}
+// 	}
+// }
+
+void Server::broadtoChannel(Channel *chan, Client* sender, const std::string& msg)
+{
+	const std::set<int>& members = chan->getMembers();
+
+	for (std::set<int>::const_iterator it = members.begin(); it != members.end(); ++it)
 	{
-		if (sender == NULL || it->second != sender)
-			sendResponse(it->second, msg);
+		int targetFd = *it;
+		std::map<int, Client*>::iterator itClient = _clients.find(targetFd);
+
+		if (itClient == _clients.end())
+			continue;
+
+		Client* target = itClient->second;
+
+		if (sender == NULL || target != sender)
+			sendResponse(target, msg);
 	}
 }
 
 void Server::broadStrict_toChannel(Channel* chan, Client* sender, const std::string& msg, std::set<int>& alreadySent)
 {
-	std::map<int, Client*>& members = chan->getMembers();
+	const std::set<int>& members = chan->getMembers();
 
-	for (std::map<int, Client*>::iterator it = members.begin(); it != members.end(); ++it)
+	for (std::set<int>::const_iterator it = members.begin(); it != members.end(); ++it)
 	{
-		int targetFd = it->first;
+		int targetFd = *it;
 
-		if (sender != NULL && it->second == sender)
+		if (sender != NULL && targetFd == sender->getFd())
 			continue;
-		if (alreadySent.find(targetFd) == alreadySent.end())
-		{
-			sendResponse(it->second, msg);
-			alreadySent.insert(targetFd);
-		}
+		if (alreadySent.find(targetFd) != alreadySent.end())
+			continue;
+
+		std::map<int, Client*>::iterator itClient = _clients.find(targetFd);
+		if (itClient == _clients.end())
+			continue;
+
+		sendResponse(itClient->second, msg);
+		alreadySent.insert(targetFd);
 	}
 }
