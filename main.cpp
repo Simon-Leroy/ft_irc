@@ -1,10 +1,9 @@
 #include "include/Server.hpp"
 
-// 1. Déclarer une variable globale pour l'état du serveur
 bool g_running = true;
 
-// 2. Créer le gestionnaire de signal (Handler)
-void signalHandler(int signum) {
+void signalHandler(int signum)
+{
     (void)signum; // Éviter le warning unused
     std::cout << "\nArrêt propre du serveur..." << std::endl;
     g_running = false;
