@@ -14,7 +14,7 @@ void	Server::processInput(Client* client, std::string input)
 
 	if(!client->getIsRegistered())
 		std::cout << BLUE << "Client fd  " << client->getFd() << " -> " << input << RESET << std::endl;
-	else 
+	else
 		std::cout << "Client fd  " << client->getFd() << " -> " << input << std::endl;
 
 	std::string trimmed_input = ft_trim(input);
@@ -36,7 +36,11 @@ void	Server::processInput(Client* client, std::string input)
 		(this->*_commands[cmdName])(client, tokens);
 	}
 	else
-		std::cerr << "Unknown command" << std::endl;
+	{
+		std::string msg = tokens[0] + " :Unknown command";
+		sendNumeric(client, ERR_UNKNOWNCOMMAND, msg);
+		return ;
+	}
 }
 
 Client* Server::findClientFromNick(const std::string& nick) const

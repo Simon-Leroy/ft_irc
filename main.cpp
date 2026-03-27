@@ -5,7 +5,7 @@ bool g_running = true;
 void signalHandler(int signum)
 {
     (void)signum; // Éviter le warning unused
-    std::cout << "\nArrêt propre du serveur..." << std::endl;
+    std::cout << "\nServer shutting down..." << std::endl;
     g_running = false;
 }
 
@@ -33,8 +33,3 @@ int main(int ac, char **av)
     }
     return 0;
 }
-
-// attributs vecteurs a modifier ?
-//
-// non-blocking + buffers + passage des lignes au protocole + envoi + gestion des erreurs
-//

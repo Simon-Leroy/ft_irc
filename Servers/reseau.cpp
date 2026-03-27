@@ -34,7 +34,12 @@ void Server::run()
     while (true)
     {
         if (poll(_pfds.data(), _pfds.size(), -1) < 0)
-            throw std::runtime_error("poll failed");
+        {
+            if (g_running == false)
+                break ;
+            else
+                throw std::runtime_error("poll failed");
+        }
 
         if (_pfds[0].revents & POLLIN)
             acceptNewClient();
@@ -47,7 +52,7 @@ void Server::run()
 
             if (revents & (POLLERR | POLLHUP | POLLNVAL))
             {
-                removeClient(i); // gestion des erreurs comme RFC 
+                removeClient(i); // gestion des erreurs comme RFC
                 continue;
             }
 
@@ -63,7 +68,7 @@ void Server::run()
             {
                 handleWriteEvent(i);
             }
-            i++;    
+            i++;
         }
     }
 }
@@ -155,6 +160,9 @@ void Server::handleReadEvent(size_t i)
         return;
     }
 
+    /*     buffer[bytes] = '\0';
+    std::cout << buffer << std::endl; */
+
     client->appendToInputBuffer(buffer, bytes);
 
     while (true)
@@ -177,7 +185,7 @@ void Server::handleReadEvent(size_t i)
 void Server::handleWriteEvent(size_t i)
 {
     int fd = _pfds[i].fd;
-    Client* client = _clients[fd]; // Dangereux si fd n'existe pas 
+    Client* client = _clients[fd]; // Dangereux si fd n'existe pas
 
     std::string& out = client->getOutputBuffer();
     if (out.empty())
