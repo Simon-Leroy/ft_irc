@@ -3,16 +3,7 @@
 #include "../include/Channel.hpp"
 #include "../include/Numerics.hpp"
 
-/*
-Fonction de process de l'input
 
-1)trim le début de la string pour enlever les espaces vides
-(trim aussi la fin de \\r et \\n ?)
-2)tokenize la string en vecteur d'arguments (contenant notamment
-la commande utilisée)
-3)on passe la commande en majuscules
-4)on cherche la commande dans la map et on l'exécute si elle existe,
-sinon on renvoie un message d'erreur */
 void	Server::processInput(Client* client, std::string input)
 {
 	if (input.empty())
@@ -40,7 +31,6 @@ void	Server::processInput(Client* client, std::string input)
 		sendNumeric(client, ERR_NOTREGISTERED, ":Not registered");
 		return ;
 	}
-	// si meme timestamp que affichage nouveau client alors afficher en bleu sinon en Blanc
 	if (_commands.count(cmdName))
 	{
 		(this->*_commands[cmdName])(client, tokens);

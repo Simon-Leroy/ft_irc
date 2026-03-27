@@ -176,11 +176,6 @@ void Server::handleReadEvent(size_t i)
 
 void Server::handleWriteEvent(size_t i)
 {
-    // 1. récupérer le fd et le client
-    // 2. vérifier s’il y a quelque chose à envoyer
-    // 3. appeler send()
-    // 4. en fontion de ce que return send, supprimer POLL OUTou continuer de conserver les donnees etc
-
     int fd = _pfds[i].fd;
     Client* client = _clients[fd]; // Dangereux si fd n'existe pas 
 
