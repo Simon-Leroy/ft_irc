@@ -127,7 +127,7 @@ irssi
 /join #channelname
 ```
 
-**Option 2: Netcat (Simple TCP connection)**
+**Option 2: Netcat (small raw network client)**
 ```bash
 nc -C 127.0.0.1 <port>
 ```

@@ -12,15 +12,15 @@ void Client::appendToOutputBuffer(const std::string& data)
 
 bool Client::hasCompleteLine() const
 {
-    // return (_inputBuffer.find("\r\n") != std::string::npos);
-    return (_inputBuffer.find("\n") != std::string::npos);
+    return (_inputBuffer.find("\r\n") != std::string::npos);
+    // return (_inputBuffer.find("\n") != std::string::npos);
 }
 
 // Pour IRC une ligne est strictement terminee par la "\r\n"
 std::string Client::extractLine()
 {
-    // size_t pos = _inputBuffer.find("\r\n");
-    size_t pos = _inputBuffer.find("\n");
+    size_t pos = _inputBuffer.find("\r\n");
+    // size_t pos = _inputBuffer.find("\n");
 
     if (pos == std::string::npos)
         return "";
