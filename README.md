@@ -34,34 +34,49 @@ The server implements core IRC functionality as specified in RFC 1459 and relate
 
 **Authentication & User Management:**
 - **PASS** - Authenticate with server password before connection
+`/PASS monmotdepasse`
 - **NICK** - Set or change client nickname
+`/nick arthur`
 - **USER** - Register username and real name
 - Validation of credentials before allowing channel/message operations
+`/USER alandel 0 * :Arthur Landel`
 
 **Channel Operations:**
 - **JOIN** - Subscribe to a channel and receive all channel messages
+`/join #test (if_key)`
 - **PART** - Leave a channel
-- **LIST** - Display available channels and user counts
+`/part #test (msg)`
 - Message broadcasting to all channel members
 
 **Private Messaging:**
-- **PRIVMSG** - Send direct messages to specific users
-- **NOTICE** - Send informational messages
+- **PRIVMSG** - Send direct messages to specific users/channels
+`/PRIVMSG pierre :salut`
+`/PRIVMSG #test :bonjour tout le monde`
 
 **Channel Operator Commands:**
 - **KICK** - Remove a client from the channel (operators only)
+`/kick #test pierre`
 - **INVITE** - Invite a client to a channel (operators only)
+`/invite pierre #test`
 - **TOPIC** - View or change the channel topic (restricted if mode +t)
+Which topic : `/topic #test`
+Change topic : `/topic #test Bienvenue sur le channel`
 - **MODE** - Manage channel modes:
   - `+/-i` - Invite-only channel
   - `+/-t` - Restrict TOPIC command to operators
   - `+/-k` - Set/remove channel password
   - `+/-o` - Grant/revoke operator privileges
   - `+/-l` - Set/remove maximum user limit
+`/MODE #test +i`
+`/MODE #test +t`
+`/MODE #test +k secret`
+`/MODE #test +o pierre`
+`/MODE #test +l 10`
 
 **Server Management:**
 - **QUIT** - Disconnect cleanly from server
-- **PING/PONG** - Keep-alive mechanism
+`/quit (msg)`
+- **PING/PONG** - Keep-alive mechanism (not a command)
 
 ## Instructions
 
