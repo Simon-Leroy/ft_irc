@@ -1,9 +1,8 @@
 NAME = ircserv
 
 SRCFILES = Clients/Client.cpp \
+			Clients/ClientChanMgmt.cpp \
 			Clients/reseau.cpp \
-			Clients/Set.cpp \
-			Clients/irc.cpp \
 			Commands/capCmd.cpp \
 			Commands/initAllCommands.cpp \
 			Commands/inviteCmd.cpp \
@@ -23,7 +22,7 @@ SRCFILES = Clients/Client.cpp \
 			Servers/ServerChanMgmt.cpp \
 			Servers/ServerUtils.cpp \
 			Servers/set.cpp \
-			Channel.cpp \
+			Channel/Channel.cpp \
 			Utils.cpp \
 			main.cpp
 # 			Servers/irc.cpp \
