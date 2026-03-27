@@ -6,6 +6,7 @@
 void Server::registerClient(Client* client)
 {
 	client->setIsRegistered(true);
+    std::cout << "------------------------------------\n" << "| Nouveau client connecté | fd = " << client->getFd() <<  " |\n------------------------------------" << std::endl;
 	sendNumeric(client, RPL_WELCOME, ":Welcome to the IRC network");
 }
 

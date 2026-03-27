@@ -74,7 +74,7 @@ void Server::acceptNewClient()
     if (clientFd < 0)
         return; // Ajout gestion de l'erreur
 
-    std::cout << "------------------------------------\n" << "| Nouveau client connecté | fd = " << clientFd <<  " |\n------------------------------------" << std::endl;
+    std::cout << BLUE <<"[CONNEXION TCP INIT] fd = " << clientFd << std::endl;
 
     int flags = fcntl(clientFd, F_GETFL);
     if (flags == -1)
@@ -108,7 +108,8 @@ void Server::removeClient(size_t i)
         return;
     }
 
-    std::cout << "------------------------------\n" << "| Client déconnecté | fd = " << fd <<  " |\n------------------------------" << std::endl;
+    if(itClient->second->getIsRegistered())
+        std::cout << "------------------------------\n" << "| Client déconnecté | fd = " << fd <<  " |\n------------------------------" << std::endl;
 
     for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); )
     {
@@ -138,7 +139,12 @@ void Server::removeClient(size_t i)
 void Server::handleReadEvent(size_t i)
 {
     int fd = _pfds[i].fd;
-    Client* client = _clients[fd];
+
+    std::map<int, Client*>::iterator it = _clients.find(fd);
+    if (it == _clients.end())
+        return;
+
+    Client* client = it->second;
 
     char buffer[1024];
     int bytes = recv(fd, buffer, sizeof(buffer), 0);
@@ -151,11 +157,19 @@ void Server::handleReadEvent(size_t i)
 
     client->appendToInputBuffer(buffer, bytes);
 
-    // if (client->hasCompleteLine())
-    while (client->hasCompleteLine())
+    while (true)
     {
+        // Check pcq processInpu peut avoir supprime le clinet en executant QUIT
+        it = _clients.find(fd);
+        if (it == _clients.end())
+            return;
+
+        client = it->second;
+
+        if (!client->hasCompleteLine())
+            break;
+
         std::string line = client->extractLine();
-        // std::cout << line << "\n";
         processInput(client, line);
     }
 }
