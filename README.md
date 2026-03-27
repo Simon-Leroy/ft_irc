@@ -1,42 +1,45 @@
-## Arthur part -> transport reseau
-Deja effectue :
--init_socket = creation socket serveur avec mise sur ecoute de cette derniere (bind)
--run = fonction permettant dajouter dynamiquement des clients et dafficher lorsque un join
+*This project has been created as part of the 42 curriculum by alandel, sleroy*
 
-A faire :
--Gerer autres flags de revent + faire attention a l'odre de traitement (eviter de sortir avant davoir execute certaines demandes)
--Commencer a implementer la fonction permettant de ne pas bloquer le flux (ne pas bloquer les fd)
+# IRC : Internet Relay Chat
 
-Update 11/03 19h22:
--> l'envoie des msg nest pas recu pas le serveur, le bug provient du '\r' qui nest pas genere automatiquement sur mac (a tester sur autre environnement), donc parsing plus light en attendant avec uniquemnt "\n"
+## Description 
+• A “Description” section that clearly presents the project, including its goal and a
+brief overview.
+
+The purpose of this project is to create an IRC server. Comprendre comment gerer les requetes de plusieurs clients avec 1 seul poll.
+plus dexplications sur la aprtie transport :
+
+pus dexplications sur la partie IRC protocol :
 
 
-MERGE :
+## Instructions
+• An “Instructions” section containing any relevant information about compilation,
+installation, and/or execution.
 
-Server.hpp -> pesner a ajuster constructeur cote Simon / modif appel attribut _client cote Arthur + voir si on garde pointeur sur CLietn dans map
-A FAIRE : chaucn met au propre ses fichiers puis call pour tester un main commun 
+### Installation 
+To use a real IRC Client (our project is only about the server)
+-> apt install irssi
 
-## PROCESS visé :
-1. créer la socket serveur
-2. attacher la socket au port
-3. mettre la socket en mode écoute
-4. ajouter la socket serveur dans poll(), -1 == att indefiniment
-//-> poll surveille si un client veut se connecter
-5. si la socket serveur devient lisible
-//-> accept() une nouvelle connexion
-//-> on obtient un nouveau clientFd
-6. mettre le clientFd en non-blocking
-7. ajouter le clientFd à poll()
-//-> poll surveillera maintenant les messages du client
-8. quand poll indique que le client est lisible
-//-> recv() les données
-9. stocker les données dans inputBuffer
-//-> reconstruire les lignes terminées par \r\n
-10. appeler la couche protocole IRC
-handleLine(fd, line)
-11. si une réponse doit être envoyée
--> ajouter dans outputBuffer
-12. quand poll indique que la socket est writable
--> send() les données
-13. si recv == 0 ou erreur
--> déconnecter le client
+To use netcast (simple connexion ???)
+
+### Execution
+1. make / 
+2. /exec <port> <mp>
+3. open a new terminal
+4. 2 options 
+a. cmd 1 : irssi , then in the irssi window : /connect localhost <port> <mp>
+b. nc -C 127.0.0.1 6668
+
+### Cmd available
+
+• A “Resources” section listing classic references related to the topic (documen-
+tation, articles, tutorials, etc.), as well as a description of how AI was used —
+specifying for which tasks and which parts of the project.
+
+Ressources : RFC, ??, ???
+AI was used in this project for:
+- Understanding RFC protocol and best practices
+- Clarifying theoretical concepts as non-blocking and ??
+
+
+
