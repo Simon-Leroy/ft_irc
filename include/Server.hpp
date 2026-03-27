@@ -85,7 +85,7 @@ public:
 	void	execPass(Client* client, const std::vector<std::string>& args);
 	void	execUser(Client* client, const std::vector<std::string>& args);
 	void	execPrivmsg(Client* client, const std::vector<std::string>& args);
-	void	execPong(Client* client, const std::vector<std::string>& args);
+	void	execPing(Client* client, const std::vector<std::string>& args);
 	void	execTopic(Client* client, const std::vector<std::string>& args);
 	void	execInvite(Client* client, const std::vector<std::string>& args);
 		void	execPart(Client* client, const std::vector<std::string>& args); // NEW
