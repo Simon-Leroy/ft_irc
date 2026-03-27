@@ -20,11 +20,40 @@ The server communicates via **TCP/IP** (IPv4/IPv6) protocol. Connection handling
 - **connect()** - Establishes outbound connections (for client requests)
 - **send/recv()** - Handles non-blocking data transmission
 - **setsockopt()** - Configures socket options (SO_REUSEADDR, etc.)
-- **gethostbyname/getaddrinfo()** - Resolves hostnames to IP addresses
-- **htons/htonl/ntohs/ntohl** - Converts between host and network byte order
-- **inet_addr/inet_ntoa/inet_ntop()** - Handles IPv4/IPv6 address conversions
+- **htons** - Converts between host and network byte order
 - **poll()** - Single polling mechanism monitoring all file descriptors for read/write events
 - **fcntl()** - Sets non-blocking mode on file descriptors (required for macOS compatibility)
+
+#### sockaddr_in Structure
+```cpp
+struct sockaddr_in {
+    short sin_family;           // AF_INET (IPv4)
+    unsigned short sin_port;    // Port number (in network byte order via htons)
+    struct in_addr sin_addr;    // IP address
+    char sin_zero[8];           // Padding (set to zero)
+};
+
+struct in_addr {
+    unsigned long s_addr;       // 32-bit IPv4 address (network byte order)
+};
+```
+Used to store server and client address information. Fields must be set in network byte order using conversion functions like `htons()` for ports.
+
+#### pollfd Structure
+```cpp
+struct pollfd {
+    int fd;                     // File descriptor to monitor
+    short events;               // Events to monitor (POLLIN, POLLOUT, POLLERR)
+    short revents;              // Events that occurred (set by poll())
+};
+```
+Common flags:
+- `POLLIN` - Data available to read
+- `POLLOUT` - Ready to write data
+- `POLLERR` - Error condition
+- `POLLHUP` - Connection closed
+
+One `pollfd` array entry per monitored file descriptor (listening socket + each client connection).
 
 All I/O operations remain **non-blocking**, preventing server hangs while handling multiple clients simultaneously.
 
@@ -41,12 +70,9 @@ The server implements core IRC functionality as specified in RFC 1459 and relate
 **Channel Operations:**
 - **JOIN** - Subscribe to a channel and receive all channel messages
 - **PART** - Leave a channel
-- **LIST** - Display available channels and user counts
-- Message broadcasting to all channel members
 
 **Private Messaging:**
 - **PRIVMSG** - Send direct messages to specific users
-- **NOTICE** - Send informational messages
 
 **Channel Operator Commands:**
 - **KICK** - Remove a client from the channel (operators only)
@@ -99,17 +125,40 @@ Example:
 ### Using an IRC Client
 
 **Option 1: IRSSI (Full-featured IRC client)**
+
+Install (Debian/Ubuntu):
 ```bash
-# Install (Debian/Ubuntu)
 sudo apt install irssi
+```
 
-# Launch and connect
+Launch and connect to your server:
+```bash
 irssi
+```
 
-# Inside irssi:
+Inside irssi, execute these commands in order:
+
+```
+# Connect to your server with password authentication
 /connect localhost <port> <password>
+
+# Set your nickname
 /nick your_nickname
+
+# Join a channel
 /join #channelname
+
+# Send a message in the channel
+/msg #channelname Hello everyone!
+
+# Send a private message to another user
+/msg other_user Private message here
+
+# Leave the channel
+/part #channelname
+
+# Disconnect
+/quit
 ```
 
 **Option 2: Netcat (Simple TCP connection)**
@@ -183,8 +232,6 @@ AI was utilized in this project for:
 - **Protocol Understanding:** Clarifying RFC 1459 specifications and IRC command semantics
 - **Non-blocking I/O Concepts:** Explaining polling mechanisms, event-driven architecture, and asynchronous handling
 - **Socket Programming:** Best practices for TCP connection management and byte order conversions
-- **Code Review & Debugging:** Identifying potential race conditions and memory management issues
-- **Error Handling:** Implementing robust error checking for network operations and protocol violations
 
 ---
 
