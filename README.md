@@ -39,7 +39,7 @@ The server implements core IRC functionality as specified in RFC 1459 and relate
 `/nick arthur`
 - **USER** - Register username and real name
 - Validation of credentials before allowing channel/message operations
-`/USER alandel 0 * :Arthur Landel`
+`/user alandel 0 * :Arthur Landel`
 
 **Channel Operations:**
 - **JOIN** - Subscribe to a channel and receive all channel messages
@@ -50,8 +50,8 @@ The server implements core IRC functionality as specified in RFC 1459 and relate
 
 **Private Messaging:**
 - **PRIVMSG** - Send direct messages to specific users/channels
-`/PRIVMSG pierre :salut`
-`/PRIVMSG #test :bonjour tout le monde`
+`/msg pierre :salut`
+`/msg #test :bonjour tout le monde`
 
 **Channel Operator Commands:**
 - **KICK** - Remove a client from the channel (operators only)
@@ -67,11 +67,11 @@ Change topic : `/topic #test Bienvenue sur le channel`
   - `+/-k` - Set/remove channel password
   - `+/-o` - Grant/revoke operator privileges
   - `+/-l` - Set/remove maximum user limit
-`/MODE #test +i`
-`/MODE #test +t`
-`/MODE #test +k secret`
-`/MODE #test +o pierre`
-`/MODE #test +l 10`
+`/mode #test +i`
+`/mode #test +t`
+`/mode #test +k secret`
+`/mode #test +o pierre`
+`/mode #test +l 10`
 
 **Server Management:**
 - **QUIT** - Disconnect cleanly from server
@@ -163,6 +163,7 @@ Then manually type IRC commands (requires knowledge of IRC protocol).
 ### Official References
 - [RFC 1459 - Internet Relay Chat Protocol](https://tools.ietf.org/html/rfc1459) - Core IRC specification
 - [RFC 2811-2813 - IRC Architecture and Extensions](https://tools.ietf.org/html/rfc2811) - Advanced features and modes
+- [Modern IRC Client Protocol](https://modern.ircdocs.horse/#rplendofwho-315) - Clearer IRC specification
 
 ### Technical Documentation
 - [Linux man pages: socket API](https://man7.org/linux/man-pages/man7/socket.7.html) - Socket programming guide
@@ -198,8 +199,6 @@ AI was utilized in this project for:
 - **Protocol Understanding:** Clarifying RFC 1459 specifications and IRC command semantics
 - **Non-blocking I/O Concepts:** Explaining polling mechanisms, event-driven architecture, and asynchronous handling
 - **Socket Programming:** Best practices for TCP connection management and byte order conversions
-- **Code Review & Debugging:** Identifying potential race conditions and memory management issues
-- **Error Handling:** Implementing robust error checking for network operations and protocol violations
 
 ---
 
