@@ -62,17 +62,17 @@ All I/O operations remain **non-blocking**, preventing server hangs while handli
 The server implements core IRC functionality as specified in RFC 1459 and related RFCs. Key protocol features include:
 
 **Authentication & User Management:**
-- **PASS** - Authenticate with server password before connection
-- **NICK** - Set or change client nickname
+- **PASS** - Authenticate with server password before connection | IRSSI: `/connect localhost 6667 mypassword`
+- **NICK** - Set or change client nickname | IRSSI: `/nick your_nickname`
 - **USER** - Register username and real name
 - Validation of credentials before allowing channel/message operations
 
 **Channel Operations:**
-- **JOIN** - Subscribe to a channel and receive all channel messages
-- **PART** - Leave a channel
+- **JOIN** - Subscribe to a channel and receive all channel messages | IRSSI: `/join #channelname`
+- **PART** - Leave a channel | IRSSI: `/part #channelname`
 
 **Private Messaging:**
-- **PRIVMSG** - Send direct messages to specific users
+- **PRIVMSG** - Send direct messages to specific users | IRSSI: `/msg username Private message here` or `/msg #channelname Channel message here`
 
 **Channel Operator Commands:**
 - **KICK** - Remove a client from the channel (operators only)
@@ -86,7 +86,7 @@ The server implements core IRC functionality as specified in RFC 1459 and relate
   - `+/-l` - Set/remove maximum user limit
 
 **Server Management:**
-- **QUIT** - Disconnect cleanly from server
+- **QUIT** - Disconnect cleanly from server | IRSSI: `/quit`
 - **PING/PONG** - Keep-alive mechanism
 
 ## Instructions
@@ -136,61 +136,12 @@ Launch and connect to your server:
 irssi
 ```
 
-Inside irssi, execute these commands in order:
-
-```
-# Connect to your server with password authentication
-/connect localhost <port> <password>
-
-# Set your nickname
-/nick your_nickname
-
-# Join a channel
-/join #channelname
-
-# Send a message in the channel
-/msg #channelname Hello everyone!
-
-# Send a private message to another user
-/msg other_user Private message here
-
-# Leave the channel
-/part #channelname
-
-# Disconnect
-/quit
-```
-
 **Option 2: Netcat (Simple TCP connection)**
 ```bash
 nc -C 127.0.0.1 <port>
 ```
 
 Then manually type IRC commands (requires knowledge of IRC protocol).
-
-### Available Commands
-
-**Connection:**
-- `PASS <password>` - Authenticate
-- `NICK <nickname>` - Set nickname
-- `USER <username> 0 * :<realname>` - Register user
-
-**Channels:**
-- `JOIN <#channel>` - Join a channel
-- `PART <#channel>` - Leave a channel
-- `TOPIC <#channel> [new topic]` - View/set topic
-- `KICK <#channel> <nick>` - Remove user
-- `INVITE <nick> <#channel>` - Invite user
-- `MODE <#channel> <+/-modes> [parameters]` - Manage modes
-
-**Messaging:**
-- `PRIVMSG <target> :<message>` - Send private message
-- `NOTICE <target> :<message>` - Send notice
-
-**Server:**
-- `QUIT [reason]` - Disconnect gracefully
-- `PING` - Server keep-alive
-- `LIST` - Show channels
 
 ## Resources
 
