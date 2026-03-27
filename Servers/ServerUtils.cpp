@@ -24,7 +24,7 @@ void	Server::processInput(Client* client, std::string input)
 	if(!client->getIsRegistered())
 		std::cout << BLUE << "Client fd  " << client->getFd() << " -> " << input << RESET << std::endl;
 	else 
-		std::cout << input << std::endl;
+		std::cout << "Client fd  " << client->getFd() << " -> " << input << std::endl;
 
 	std::string trimmed_input = ft_trim(input);
 	std::vector<std::string> tokens = ft_split(trimmed_input);
