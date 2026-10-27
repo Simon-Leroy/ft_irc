@@ -20,40 +20,11 @@ The server communicates via **TCP/IP** (IPv4/IPv6) protocol. Connection handling
 - **connect()** - Establishes outbound connections (for client requests)
 - **send/recv()** - Handles non-blocking data transmission
 - **setsockopt()** - Configures socket options (SO_REUSEADDR, etc.)
-- **htons** - Converts between host and network byte order
+- **gethostbyname/getaddrinfo()** - Resolves hostnames to IP addresses
+- **htons/htonl/ntohs/ntohl** - Converts between host and network byte order
+- **inet_addr/inet_ntoa/inet_ntop()** - Handles IPv4/IPv6 address conversions
 - **poll()** - Single polling mechanism monitoring all file descriptors for read/write events
 - **fcntl()** - Sets non-blocking mode on file descriptors (required for macOS compatibility)
-
-#### sockaddr_in Structure
-```cpp
-struct sockaddr_in {
-    short sin_family;           // AF_INET (IPv4)
-    unsigned short sin_port;    // Port number (in network byte order via htons)
-    struct in_addr sin_addr;    // IP address
-    char sin_zero[8];           // Padding (set to zero)
-};
-
-struct in_addr {
-    unsigned long s_addr;       // 32-bit IPv4 address (network byte order)
-};
-```
-Used to store server and client address information. Fields must be set in network byte order using conversion functions like `htons()` for ports.
-
-#### pollfd Structure
-```cpp
-struct pollfd {
-    int fd;                     // File descriptor to monitor
-    short events;               // Events to monitor (POLLIN, POLLOUT, POLLERR)
-    short revents;              // Events that occurred (set by poll())
-};
-```
-Common flags:
-- `POLLIN` - Data available to read
-- `POLLOUT` - Ready to write data
-- `POLLERR` - Error condition
-- `POLLHUP` - Connection closed
-
-One `pollfd` array entry per monitored file descriptor (listening socket + each client connection).
 
 All I/O operations remain **non-blocking**, preventing server hangs while handling multiple clients simultaneously.
 
@@ -62,32 +33,50 @@ All I/O operations remain **non-blocking**, preventing server hangs while handli
 The server implements core IRC functionality as specified in RFC 1459 and related RFCs. Key protocol features include:
 
 **Authentication & User Management:**
-- **PASS** - Authenticate with server password before connection | IRSSI: `/connect localhost 6667 mypassword`
-- **NICK** - Set or change client nickname | IRSSI: `/nick your_nickname`
+- **PASS** - Authenticate with server password before connection
+`/PASS monmotdepasse`
+- **NICK** - Set or change client nickname
+`/nick arthur`
 - **USER** - Register username and real name
 - Validation of credentials before allowing channel/message operations
+`/user alandel 0 * :Arthur Landel`
 
 **Channel Operations:**
-- **JOIN** - Subscribe to a channel and receive all channel messages | IRSSI: `/join #channelname`
-- **PART** - Leave a channel | IRSSI: `/part #channelname`
+- **JOIN** - Subscribe to a channel and receive all channel messages
+`/join #test (if_key)`
+- **PART** - Leave a channel
+`/part #test (msg)`
+- Message broadcasting to all channel members
 
 **Private Messaging:**
-- **PRIVMSG** - Send direct messages to specific users | IRSSI: `/msg username Private message here` or `/msg #channelname Channel message here`
+- **PRIVMSG** - Send direct messages to specific users/channels
+`/msg pierre :salut`
+`/msg #test :bonjour tout le monde`
 
 **Channel Operator Commands:**
 - **KICK** - Remove a client from the channel (operators only)
+`/kick #test pierre`
 - **INVITE** - Invite a client to a channel (operators only)
+`/invite pierre #test`
 - **TOPIC** - View or change the channel topic (restricted if mode +t)
+Which topic : `/topic #test`
+Change topic : `/topic #test Bienvenue sur le channel`
 - **MODE** - Manage channel modes:
   - `+/-i` - Invite-only channel
   - `+/-t` - Restrict TOPIC command to operators
   - `+/-k` - Set/remove channel password
   - `+/-o` - Grant/revoke operator privileges
   - `+/-l` - Set/remove maximum user limit
+`/mode #test +i`
+`/mode #test +t`
+`/mode #test +k secret`
+`/mode #test +o pierre`
+`/mode #test +l 10`
 
 **Server Management:**
-- **QUIT** - Disconnect cleanly from server | IRSSI: `/quit`
-- **PING/PONG** - Keep-alive mechanism
+- **QUIT** - Disconnect cleanly from server
+`/quit (msg)`
+- **PING/PONG** - Keep-alive mechanism (not a command)
 
 ## Instructions
 
@@ -125,29 +114,56 @@ Example:
 ### Using an IRC Client
 
 **Option 1: IRSSI (Full-featured IRC client)**
-
-Install (Debian/Ubuntu):
 ```bash
+# Install (Debian/Ubuntu)
 sudo apt install irssi
-```
 
-Launch and connect to your server:
-```bash
+# Launch and connect
 irssi
+
+# Inside irssi:
+/connect localhost <port> <password>
+/nick your_nickname
+/join #channelname
 ```
 
-**Option 2: Netcat (Simple TCP connection)**
+**Option 2: Netcat (small raw network client)**
 ```bash
 nc -C 127.0.0.1 <port>
 ```
 
 Then manually type IRC commands (requires knowledge of IRC protocol).
 
+### Available Commands
+
+**Connection:**
+- `PASS <password>` - Authenticate
+- `NICK <nickname>` - Set nickname
+- `USER <username> 0 * :<realname>` - Register user
+
+**Channels:**
+- `JOIN <#channel>` - Join a channel
+- `PART <#channel>` - Leave a channel
+- `TOPIC <#channel> [new topic]` - View/set topic
+- `KICK <#channel> <nick>` - Remove user
+- `INVITE <nick> <#channel>` - Invite user
+- `MODE <#channel> <+/-modes> [parameters]` - Manage modes
+
+**Messaging:**
+- `PRIVMSG <target> :<message>` - Send private message
+- `NOTICE <target> :<message>` - Send notice
+
+**Server:**
+- `QUIT [reason]` - Disconnect gracefully
+- `PING` - Server keep-alive
+- `LIST` - Show channels
+
 ## Resources
 
 ### Official References
 - [RFC 1459 - Internet Relay Chat Protocol](https://tools.ietf.org/html/rfc1459) - Core IRC specification
 - [RFC 2811-2813 - IRC Architecture and Extensions](https://tools.ietf.org/html/rfc2811) - Advanced features and modes
+- [Modern IRC Client Protocol](https://modern.ircdocs.horse/#rplendofwho-315) - Clearer IRC specification
 
 ### Technical Documentation
 - [Linux man pages: socket API](https://man7.org/linux/man-pages/man7/socket.7.html) - Socket programming guide

@@ -1,8 +1,20 @@
-#include "../include/Client.hpp"
+#include "../../include/Client.hpp"
 
-/* ==== MEMBER FUNCTIONS ==== */
+Client::Client(int fd)
+    : _fd(fd),
+      _hasNickname(false),
+      _hasPassword(false),
+      _hasUser(false),
+      _isRegistered(false)
+{
+}
 
-/* ==== GETTERS AND SETTERS ==== */
+Client::~Client()
+{
+
+}
+
+/* ==== SETTERS ==== */
 
 void Client::setNickname(const std::string& nick)
 {
@@ -39,22 +51,6 @@ void Client::setIsRegistered(bool status)
 	this->_isRegistered = status;
 }
 
-std::string Client::getNickname(void) const
-{
-	return this->_nickname;
-}
-
-std::string Client::getUsername(void) const
-{
-	return this->_username;
-}
-
-int Client::getFd(void) const
-{
-	return this->_fd;
-}
-
-
 
 /* ==== GETTERS ==== */
 
@@ -86,4 +82,19 @@ std::string &Client::getInputBuffer()
 std::string& Client::getOutputBuffer()
 {
     return _outputBuffer;
+}
+
+std::string Client::getNickname(void) const
+{
+	return this->_nickname;
+}
+
+std::string Client::getUsername(void) const
+{
+	return this->_username;
+}
+
+int Client::getFd(void) const
+{
+	return this->_fd;
 }

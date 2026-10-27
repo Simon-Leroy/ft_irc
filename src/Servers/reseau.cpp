@@ -1,5 +1,5 @@
-#include "../include/Server.hpp"
-#include "../include/Client.hpp"
+#include "../../include/Server.hpp"
+#include "../../include/Client.hpp"
 
 //initier une socket (canal bi-lateral) et mettre sur ecoute sur le bon port
 void Server::initSocket()
@@ -34,7 +34,12 @@ void Server::run()
     while (true)
     {
         if (poll(_pfds.data(), _pfds.size(), -1) < 0)
-            throw std::runtime_error("poll failed");
+        {
+            if (g_running == false)
+                break ;
+            else
+                throw std::runtime_error("poll failed");
+        }
 
         if (_pfds[0].revents & POLLIN)
             acceptNewClient();
@@ -47,7 +52,7 @@ void Server::run()
 
             if (revents & (POLLERR | POLLHUP | POLLNVAL))
             {
-                removeClient(i); // gestion des erreurs comme RFC 
+                removeClient(i); // gestion des erreurs comme RFC
                 continue;
             }
 
@@ -63,7 +68,7 @@ void Server::run()
             {
                 handleWriteEvent(i);
             }
-            i++;    
+            i++;
         }
     }
 }
@@ -155,6 +160,9 @@ void Server::handleReadEvent(size_t i)
         return;
     }
 
+    /*     buffer[bytes] = '\0';
+    std::cout << buffer << std::endl; */
+
     client->appendToInputBuffer(buffer, bytes);
 
     while (true)
@@ -176,13 +184,8 @@ void Server::handleReadEvent(size_t i)
 
 void Server::handleWriteEvent(size_t i)
 {
-    // 1. récupérer le fd et le client
-    // 2. vérifier s’il y a quelque chose à envoyer
-    // 3. appeler send()
-    // 4. en fontion de ce que return send, supprimer POLL OUTou continuer de conserver les donnees etc
-
     int fd = _pfds[i].fd;
-    Client* client = _clients[fd]; // Dangereux si fd n'existe pas 
+    Client* client = _clients[fd]; // Dangereux si fd n'existe pas
 
     std::string& out = client->getOutputBuffer();
     if (out.empty())

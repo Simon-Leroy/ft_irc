@@ -1,18 +1,9 @@
-#include "../include/Server.hpp"
-#include "../include/Client.hpp"
-#include "../include/Channel.hpp"
-#include "../include/Numerics.hpp"
+#include "../../include/Server.hpp"
+#include "../../include/Client.hpp"
+#include "../../include/Channel.hpp"
+#include "../../include/Numerics.hpp"
 
-/*
-Fonction de process de l'input
 
-1)trim le début de la string pour enlever les espaces vides
-(trim aussi la fin de \\r et \\n ?)
-2)tokenize la string en vecteur d'arguments (contenant notamment
-la commande utilisée)
-3)on passe la commande en majuscules
-4)on cherche la commande dans la map et on l'exécute si elle existe,
-sinon on renvoie un message d'erreur */
 void	Server::processInput(Client* client, std::string input)
 {
 	if (input.empty())
@@ -23,8 +14,8 @@ void	Server::processInput(Client* client, std::string input)
 
 	if(!client->getIsRegistered())
 		std::cout << BLUE << "Client fd  " << client->getFd() << " -> " << input << RESET << std::endl;
-	else 
-		std::cout << input << std::endl;
+	else
+		std::cout << "Client fd  " << client->getFd() << " -> " << input << std::endl;
 
 	std::string trimmed_input = ft_trim(input);
 	std::vector<std::string> tokens = ft_split(trimmed_input);
@@ -40,13 +31,16 @@ void	Server::processInput(Client* client, std::string input)
 		sendNumeric(client, ERR_NOTREGISTERED, ":Not registered");
 		return ;
 	}
-	// si meme timestamp que affichage nouveau client alors afficher en bleu sinon en Blanc
 	if (_commands.count(cmdName))
 	{
 		(this->*_commands[cmdName])(client, tokens);
 	}
 	else
-		std::cerr << "Unknown command" << std::endl;
+	{
+		std::string msg = tokens[0] + " :Unknown command";
+		sendNumeric(client, ERR_UNKNOWNCOMMAND, msg);
+		return ;
+	}
 }
 
 Client* Server::findClientFromNick(const std::string& nick) const

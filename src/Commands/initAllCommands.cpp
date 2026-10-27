@@ -1,7 +1,7 @@
-#include "../include/Server.hpp"
-#include "../include/Client.hpp"
-#include "../include/Channel.hpp"
-#include "../include/Numerics.hpp"
+#include "../../include/Server.hpp"
+#include "../../include/Client.hpp"
+#include "../../include/Channel.hpp"
+#include "../../include/Numerics.hpp"
 
 /*
 Fonction d'initialisation de la map contenant tous les pointeurs sur fonction
@@ -16,7 +16,7 @@ void	Server::initCommands(void)
 	_commands["NICK"] = &Server::execNick;
 	_commands["USER"] = &Server::execUser;
 	_commands["PRIVMSG"] = &Server::execPrivmsg;
-	_commands["PING"] = &Server::execPong;
+	_commands["PING"] = &Server::execPing;
 	_commands["TOPIC"] = &Server::execTopic;
 	_commands["INVITE"] = &Server::execInvite;
 	_commands["PART"] = &Server::execPart;

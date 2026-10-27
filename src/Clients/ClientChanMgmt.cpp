@@ -1,5 +1,5 @@
-#include "../include/Client.hpp"
-#include "../include/Channel.hpp"
+#include "../../include/Client.hpp"
+#include "../../include/Channel.hpp"
 
 void	Client::addChannel(Channel* chan)
 {
