@@ -1,5 +1,5 @@
-#include "../include/Server.hpp"
-#include "../include/Client.hpp"
+#include "../../include/Server.hpp"
+#include "../../include/Client.hpp"
 
 //initier une socket (canal bi-lateral) et mettre sur ecoute sur le bon port
 void Server::initSocket()

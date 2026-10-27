@@ -1,7 +1,7 @@
-#include "../include/Server.hpp"
-#include "../include/Client.hpp"
-#include "../include/Channel.hpp"
-#include "../include/Numerics.hpp"
+#include "../../include/Server.hpp"
+#include "../../include/Client.hpp"
+#include "../../include/Channel.hpp"
+#include "../../include/Numerics.hpp"
 
 /*
 Fonction d'initialisation de la map contenant tous les pointeurs sur fonction

@@ -1,4 +1,4 @@
-#include "../include/Client.hpp"
+#include "../../include/Client.hpp"
 
 void Client::appendToInputBuffer(const char *data, int bytes)
 {
@@ -26,6 +26,6 @@ std::string Client::extractLine()
         return "";
 
     std::string line = _inputBuffer.substr(0, pos);
-    _inputBuffer.erase(0, pos + 1);
+    _inputBuffer.erase(0, pos + 2);
     return line;
 }

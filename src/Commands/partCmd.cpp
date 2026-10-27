@@ -1,7 +1,7 @@
-#include "../include/Server.hpp"
-#include "../include/Client.hpp"
-#include "../include/Channel.hpp"
-#include "../include/Numerics.hpp"
+#include "../../include/Server.hpp"
+#include "../../include/Client.hpp"
+#include "../../include/Channel.hpp"
+#include "../../include/Numerics.hpp"
 
 void Server::execPart(Client* client, const std::vector<std::string>& args)
 {

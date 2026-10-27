@@ -1,31 +1,31 @@
 NAME = ircserv
 
-SRCFILES = Clients/Client.cpp \
-			Clients/ClientChanMgmt.cpp \
-			Clients/reseau.cpp \
-			Commands/capCmd.cpp \
-			Commands/initAllCommands.cpp \
-			Commands/inviteCmd.cpp \
-			Commands/joinCmd.cpp \
-			Commands/kickCmd.cpp \
-			Commands/modeCmd.cpp \
-			Commands/nickCmd.cpp \
-			Commands/partCmd.cpp \
-			Commands/passCmd.cpp \
-			Commands/pingCmd.cpp \
-			Commands/privmsgCmd.cpp \
-			Commands/topicCmd.cpp \
-			Commands/userCmd.cpp \
-			Commands/quitCmd.cpp \
-			Servers/reseau.cpp \
-			Servers/Server.cpp \
-			Servers/ServerChanMgmt.cpp \
-			Servers/ServerUtils.cpp \
-			Servers/set.cpp \
-			Channel/Channel.cpp \
-			Utils.cpp \
-			main.cpp
-# 			Servers/irc.cpp \
+SRCFILES = src/Clients/Client.cpp \
+			src/Clients/ClientChanMgmt.cpp \
+			src/Clients/reseau.cpp \
+			src/Commands/capCmd.cpp \
+			src/Commands/initAllCommands.cpp \
+			src/Commands/inviteCmd.cpp \
+			src/Commands/joinCmd.cpp \
+			src/Commands/kickCmd.cpp \
+			src/Commands/modeCmd.cpp \
+			src/Commands/nickCmd.cpp \
+			src/Commands/partCmd.cpp \
+			src/Commands/passCmd.cpp \
+			src/Commands/pingCmd.cpp \
+			src/Commands/privmsgCmd.cpp \
+			src/Commands/topicCmd.cpp \
+			src/Commands/userCmd.cpp \
+			src/Commands/quitCmd.cpp \
+			src/Servers/reseau.cpp \
+			src/Servers/Server.cpp \
+			src/Servers/ServerChanMgmt.cpp \
+			src/Servers/ServerUtils.cpp \
+			src/Servers/set.cpp \
+			src/Channel/Channel.cpp \
+			src/Utils.cpp \
+			src/main.cpp
+# 			src/Servers/irc.cpp \
 
 HEADERS = include/Server.hpp \
 			include/Channel.hpp \
